@@ -1,0 +1,332 @@
+import 'package:flutter/material.dart';
+import 'dart:math';
+
+import 'package:vector_math/vector_math.dart' show radians;
+
+import '../constants.dart';
+
+class RadialWeaponSelection extends StatefulWidget {
+  const RadialWeaponSelection({super.key});
+
+  @override
+  State<RadialWeaponSelection> createState() => _RadialWeaponSelectionState();
+}
+
+class _RadialWeaponSelectionState extends State<RadialWeaponSelection>
+    with SingleTickerProviderStateMixin {
+  late AnimationController controller;
+
+  @override
+  void initState() {
+    super.initState();
+    controller =
+        AnimationController(duration: Duration(milliseconds: 500), vsync: this);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return RadialAnimation(controller: controller);
+  }
+}
+
+// The Animation
+class RadialAnimation extends StatelessWidget {
+  RadialAnimation({super.key, required this.controller})
+      : scale = Tween<double>(
+          begin: 1.5,
+          end: 0.0,
+        ).animate(
+          CurvedAnimation(parent: controller, curve: Curves.fastOutSlowIn),
+        ),
+        translation = Tween<double>(
+          begin: 0.0,
+          end: 80.0,
+        ).animate(
+          CurvedAnimation(parent: controller, curve: Curves.linear),
+        ),
+        rotation = Tween<double>(
+          begin: 0.0,
+          end: 360.0,
+        ).animate(
+          CurvedAnimation(
+            parent: controller,
+            curve: Interval(
+              0.3,
+              0.9,
+              curve: Curves.decelerate,
+            ),
+          ),
+        );
+
+  final AnimationController controller;
+  final Animation<double> scale;
+  final Animation<double> translation;
+  final Animation<double> rotation;
+
+  build(context) {
+    return AnimatedBuilder(
+        animation: controller,
+        builder: (context, builder) {
+          return Transform.translate(
+            offset: Offset(0, 75),
+            child: Transform.rotate(
+              angle: radians(rotation.value),
+              child: Stack(alignment: Alignment.center, children: [
+                Container(
+                  width: 200,
+                  height: 200,
+                  decoration: BoxDecoration(color: Colors.transparent),
+                ),
+                BuildButton(
+                    angle: 207,
+                    image: "assets/images/knife.png",
+                    loadStatus: 1,
+                    onTap: () {
+                      print("knife");
+                      _close();
+                    },
+                    translation: translation),
+                BuildButton(
+                    angle: 249,
+                    image: "assets/images/gun_icon.png",
+                    loadStatus: 0.9,
+                    onTap: _close,
+                    translation: translation),
+                BuildButton(
+                    angle: 291,
+                    image: "assets/images/rifle.png",
+                    loadStatus: 0.6,
+                    onTap: _close,
+                    translation: translation),
+                BuildButton(
+                    angle: 333,
+                    image: "assets/images/shotgun.png",
+                    loadStatus: 0.1,
+                    onTap: _close,
+                    translation: translation),
+
+                /*
+              _buildButton(207,
+                  image: "assets/images/knife.png",
+                  loadStatus: 1,
+                  onTap: _close),
+              _buildButton(249,
+                  image: "assets/images/gun_icon.png",
+                  loadStatus: 0.9,
+                  onTap: _close),
+              _buildButton(291,
+                  image: "assets/images/rifle.png",
+                  loadStatus: 0.6,
+                  onTap: _close),
+              _buildButton(333,
+                  image: "assets/images/shotgun.png",
+                  loadStatus: 0.1,
+                  onTap: _close),
+                  */
+                Transform.scale(
+                    scale: scale.value -
+                        1.5, // subtract the beginning value to run the opposite animation
+                    child: centerButton(
+                        onTap: _close, image: "assets/images/gun_icon.png")),
+                Transform.scale(
+                  scale: scale.value,
+                  child: centerButton(
+                      onTap: _open, image: "assets/images/gun_icon.png"),
+                )
+              ]),
+            ),
+          );
+        });
+  }
+
+  _open() {
+    controller.forward();
+  }
+
+  _close() {
+    controller.reverse();
+  }
+
+/*
+  Widget _buildButton(double angle,
+      {Color color = const Color.fromARGB(47, 129, 129, 129),
+      required String image,
+      required double loadStatus,
+      required VoidCallback onTap}) {
+    final double rad = radians(angle);
+
+    return GestureDetector(
+      onTap: () {
+        print("hello");
+      },
+      child: Transform(
+        transform: Matrix4.identity()
+          ..translate(
+              (translation.value) * cos(rad), (translation.value) * sin(rad)),
+        child: Container(
+            width: kRadialWeaponOuterButtonSize,
+            height: kRadialWeaponOuterButtonSize,
+            decoration: BoxDecoration(
+              color: color,
+              shape: BoxShape.circle,
+            ),
+            child: Stack(alignment: Alignment.center, children: [
+              SizedBox(
+                height: kRadialWeaponOuterButtonSize,
+                width: kRadialWeaponOuterButtonSize,
+                child: CircularProgressIndicator(
+                  value: loadStatus,
+                  backgroundColor: Colors.redAccent,
+                  valueColor: const AlwaysStoppedAnimation(Colors.green),
+                  strokeWidth: 4,
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(6.0),
+                child: Image.asset(image),
+              )
+            ])),
+      ),
+    );
+  }
+*/
+}
+
+class BuildButton extends StatelessWidget {
+  final double angle;
+  final String image;
+  final double loadStatus;
+  final VoidCallback onTap;
+  final Animation<double> translation;
+  final Color color;
+
+  const BuildButton(
+      {super.key,
+      required this.angle,
+      this.color = const Color.fromARGB(47, 129, 129, 129),
+      required this.image,
+      required this.loadStatus,
+      required this.onTap,
+      required this.translation});
+
+  @override
+  Widget build(BuildContext context) {
+    return Transform(
+      transform: Matrix4.identity()
+        ..translate((translation.value) * cos(radians(angle)),
+            (translation.value) * sin(radians(angle))),
+      child: GestureDetector(
+        onTap: onTap,
+        child: Container(
+          width: kRadialWeaponOuterButtonSize,
+          height: kRadialWeaponOuterButtonSize,
+          decoration: BoxDecoration(
+            color: color,
+            shape: BoxShape.circle,
+          ),
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              SizedBox(
+                height: kRadialWeaponOuterButtonSize,
+                width: kRadialWeaponOuterButtonSize,
+                child: CircularProgressIndicator(
+                  value: loadStatus,
+                  backgroundColor: Colors.redAccent,
+                  valueColor: const AlwaysStoppedAnimation(Colors.green),
+                  strokeWidth: 4,
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(6.0),
+                child: Image.asset(image),
+              )
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class centerButton extends StatelessWidget {
+  final String image;
+  final Color color;
+  final VoidCallback onTap;
+
+  const centerButton({
+    required this.onTap,
+    this.color = Colors.grey,
+    required this.image,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTapDown: ((details) => onTap),
+      onTap: onTap,
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(kRadialWeaponCenterButtonSize),
+        child: Container(
+          padding: EdgeInsets.all(6),
+          width: kRadialWeaponCenterButtonSize,
+          height: kRadialWeaponCenterButtonSize,
+          decoration: BoxDecoration(
+            color: color,
+          ),
+          child: Image.asset(image),
+        ),
+      ),
+    );
+  }
+}
+/*
+//for the dotted line
+class MyPainter extends CustomPainter {
+  Color lineColor = Colors.transparent;
+  Color completeColor;
+  double width;
+  MyPainter({required this.completeColor, required this.width});
+  @override
+  void paint(Canvas canvas, Size size) {
+    Paint complete = new Paint()
+      ..color = completeColor
+      ..strokeCap = StrokeCap.round
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = width;
+
+    Offset center = new Offset(size.width / 2, size.height / 2);
+    double radius = min(size.width / 2, size.height / 2);
+    var percent = (size.width * 0.001) / 2;
+
+    double arcAngle = 2 * pi * percent;
+
+    for (var i = 0; i < 8; i++) {
+      var init = (-pi / 2) * (i / 2);
+
+      canvas.drawArc(new Rect.fromCircle(center: center, radius: radius), init,
+          arcAngle, false, complete);
+    }
+  }
+
+  @override
+  bool shouldRepaint(CustomPainter oldDelegate) {
+    return true;
+  }
+
+     _buildButton(333,
+                  child: Stack(alignment: Alignment.center, children: [
+                    Padding(
+                      padding: const EdgeInsets.all(6.0),
+                      child: Image.asset("assets/images/shotgun.png"),
+                    ),
+                    CustomPaint(
+                      size: Size(kRadialWeaponOuterButtonSize,
+                          kRadialWeaponOuterButtonSize),
+                      foregroundPainter:
+                          new MyPainter(completeColor: Colors.green, width: 4),
+                    ),
+                  ]))
+                 
+}
+ */
