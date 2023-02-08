@@ -41,15 +41,9 @@ class _NavigationState extends State<Navigation> {
               updateDirection(direction);
             }),
           ),
-          RadialWeaponSelection(),
-          /*
-          GestureDetector(
-            onTap: () => onWeaponChanged(Weapon.shotgun),
-            child: Icon(
-              Icons.switch_access_shortcut,
-              size: 40,
-            ),
-          ),*/
+          RadialWeaponSelection(
+            onWeaponChanged: onWeaponChanged,
+          ),
           JoyStick(
             listener: ((details) {
               direction.rightX = details.x;
@@ -68,7 +62,6 @@ class _NavigationState extends State<Navigation> {
   }
 
   void onWeaponChanged(Weapon weapon) {
-    print("tapped");
     widget.onWeaponChanged!(weapon);
   }
 }
@@ -83,30 +76,6 @@ class JoyStick extends StatelessWidget {
     return Joystick(
       period: Duration(milliseconds: kContollerPeriodMS),
       listener: listener,
-      /*
-      stick: Container(
-        width: 40,
-        height: 40,
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topRight,
-            end: Alignment.bottomLeft,
-            stops: [
-              0.1,
-              0.4,
-              0.6,
-              0.9,
-            ],
-            colors: [
-              Colors.yellow,
-              Colors.red,
-              Colors.indigo,
-              Colors.teal,
-            ],
-          ),
-          shape: BoxShape.circle,
-        ),
-      ),*/
       base: Container(
         width: 130,
         height: 130,

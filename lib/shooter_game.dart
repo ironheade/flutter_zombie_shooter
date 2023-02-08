@@ -5,6 +5,8 @@ import 'package:flutter_zombie_shooter/helpers/directions.dart';
 import 'package:flutter_zombie_shooter/helpers/weapons.dart';
 import 'package:flutter_zombie_shooter/player.dart';
 import 'package:flutter_zombie_shooter/world.dart';
+//import 'package:flame_tiled/flame_tiled.dart';
+//import 'package:tiled/tiled.dart' show ObjectGroup, TiledObject;
 
 class ShooterGame extends FlameGame with KeyboardEvents {
   World _world = World();
@@ -12,8 +14,11 @@ class ShooterGame extends FlameGame with KeyboardEvents {
 
   @override
   Future<void> onLoad() async {
+    //final tiledMap =        await TiledComponent.load('assets/tiles/map.tmx', Vector2(16.0, 16.0));
     super.onLoad();
+
     await add(_world);
+    //add(tiledMap);
     await add(_player);
     _player.position = _world.size / 1.5;
     camera.followComponent(_player,
@@ -25,7 +30,6 @@ class ShooterGame extends FlameGame with KeyboardEvents {
   }
 
   onWeaponChanged(Weapon weapon) {
-    print("weapon: ${weapon.toString()}");
     _player.weapon = weapon;
   }
 }
