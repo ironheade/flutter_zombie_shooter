@@ -30,6 +30,7 @@ class Player extends SpriteAnimationComponent with HasGameRef {
     await _loadAnimations().then(
       (_) => {
         animation = animations[weapon][playerAction],
+        //anchor = Anchor.center
         anchor = Anchor(0.4, 0.6), //top left clockwise: 0,0;1,0;1,1;0,1
       },
     );
