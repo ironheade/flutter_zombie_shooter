@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter_zombie_shooter/helpers/weapons.dart';
+import 'package:flutter_zombie_shooter/enums_and_constants/weapons.dart';
 import 'dart:math';
 
 import 'package:vector_math/vector_math.dart' show radians;
 
-import '../constants.dart';
+import '../enums_and_constants/constants.dart';
 
 class RadialWeaponSelection extends StatefulWidget {
   final ValueChanged<Weapon>? onWeaponChanged;

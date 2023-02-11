@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flame/game.dart';
-import 'package:flutter_zombie_shooter/helpers/weapons.dart';
+import 'package:flutter_zombie_shooter/enums_and_constants/weapons.dart';
 import 'shooter_game.dart';
 import 'helpers/navigation.dart';
 

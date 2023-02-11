@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_zombie_shooter/helpers/directions.dart';
+import 'package:flutter_zombie_shooter/enums_and_constants/directions.dart';
 import 'package:flutter_joystick/flutter_joystick.dart';
 import 'package:flutter_zombie_shooter/helpers/radialWeaponSelection.dart';
-import 'package:flutter_zombie_shooter/helpers/weapons.dart';
-import '../constants.dart';
+import 'package:flutter_zombie_shooter/enums_and_constants/weapons.dart';
+import '../enums_and_constants/constants.dart';
 
 class Navigation extends StatefulWidget {
   final ValueChanged<Direction>? onDirectionChanged;

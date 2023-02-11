@@ -5,11 +5,11 @@ import 'package:flame/image_composition.dart';
 import 'package:flame/sprite.dart';
 import 'package:flutter/cupertino.dart';
 
-import 'package:flutter_zombie_shooter/helpers/directions.dart';
-import 'package:flutter_zombie_shooter/helpers/actions.dart';
-import 'package:flutter_zombie_shooter/helpers/weapons.dart';
+import 'package:flutter_zombie_shooter/enums_and_constants/directions.dart';
+import 'package:flutter_zombie_shooter/enums_and_constants/actions.dart';
+import 'package:flutter_zombie_shooter/enums_and_constants/weapons.dart';
 
-import 'constants.dart';
+import 'enums_and_constants/constants.dart';
 
 class Player extends SpriteAnimationComponent with HasGameRef {
   Player()
@@ -30,7 +30,6 @@ class Player extends SpriteAnimationComponent with HasGameRef {
     await _loadAnimations().then(
       (_) => {
         animation = animations[weapon][playerAction],
-        //anchor = Anchor.center
         anchor = Anchor(0.4, 0.6), //top left clockwise: 0,0;1,0;1,1;0,1
       },
     );
@@ -79,10 +78,11 @@ class Player extends SpriteAnimationComponent with HasGameRef {
   }
 
   Future<void> _loadAnimations() async {
+    /*
     ImageComposition composition = ImageComposition()
       ..add(await gameRef.images.load("survivor-walk.png"), position)
       ..add(await gameRef.images.load("survivor-idle_shotgun.png"), position);
-
+*/
     Future<SpriteAnimation> makeAnimation(
         {required String spriteSheet,
         required int columns,
@@ -99,9 +99,15 @@ class Player extends SpriteAnimationComponent with HasGameRef {
     animations = {
       Weapon.knife: {
         PlayerAction.wait: await makeAnimation(
-            spriteSheet: "survivor-idle_knife.png", columns: 20, rows: 1),
+            //spriteSheet: "survivor-idle_knife.png", columns: 20, rows: 1),
+            spriteSheet: "zombie-idle.png",
+            columns: 17,
+            rows: 1),
         PlayerAction.move: await makeAnimation(
-            spriteSheet: "survivor-move_knife.png", columns: 20, rows: 1)
+            //spriteSheet: "survivor-move_knife.png", columns: 20, rows: 1)
+            spriteSheet: "zombie-move.png",
+            columns: 17,
+            rows: 1)
       },
       Weapon.handgun: {
         PlayerAction.wait: await makeAnimation(
