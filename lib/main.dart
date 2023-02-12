@@ -1,11 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flame/game.dart';
-import 'package:flutter_zombie_shooter/enums_and_constants/weapons.dart';
 import 'shooter_game.dart';
 import 'helpers/navigation.dart';
+import 'package:flutter/services.dart';
 
 void main() {
+  WidgetsFlutterBinding.ensureInitialized();
+  SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: [
+    SystemUiOverlay.bottom, //This line is used for showing the bottom bar
+  ]);
   final game = ShooterGame();
+
   runApp(
     MaterialApp(
       debugShowCheckedModeBanner: false,

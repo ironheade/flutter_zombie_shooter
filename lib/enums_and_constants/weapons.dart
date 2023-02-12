@@ -7,9 +7,15 @@ enum Offsets { x, y }
 Map<Weapon, num> weaponDelaysMS = {
   Weapon.handgun: 80,
   Weapon.rifle: 20,
-  Weapon.shotgun: 30,
+  Weapon.shotgun: 110,
   Weapon.flashlight: 10,
   Weapon.knife: 10
+};
+
+Map<Weapon, List<int>> scatterBullets = {
+  Weapon.handgun: [0],
+  Weapon.rifle: [0],
+  Weapon.shotgun: [-6, -3, 0, 3, 6],
 };
 
 Map<Weapon, String> weaponBulletSprites = {
