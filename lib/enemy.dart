@@ -6,12 +6,14 @@ import 'package:flame/sprite.dart';
 import 'package:flutter_zombie_shooter/enums_and_constants/constants.dart';
 import 'package:flutter_zombie_shooter/enums_and_constants/enemies.dart';
 import 'package:flutter_zombie_shooter/helpers/blood.dart';
+import 'package:flutter_zombie_shooter/helpers/boulder.dart';
 import 'package:flutter_zombie_shooter/helpers/bullet.dart';
 
 class Zombie extends SpriteAnimationComponent
     with CollisionCallbacks, HasGameRef {
   double _animationSpeed = kZombieAnimationSpeed;
   int healthPoints = 100;
+  double speed = kZombieSpeed;
   //List<Sprite> bloodSprites = [];
   int bloodSplashType = Random().nextInt(bloodSpasheTypes.length);
   List<List<Sprite>> bloodSpritesWithColor = [];
@@ -51,7 +53,7 @@ class Zombie extends SpriteAnimationComponent
       );
     }
 
-    add(RectangleHitbox());
+    add(RectangleHitbox()..collisionType = CollisionType.passive);
     await _loadAnimations().then(
       (_) => {
         animation = zombieAnimation,
@@ -63,11 +65,16 @@ class Zombie extends SpriteAnimationComponent
   @override
   void onCollision(Set<Vector2> intersectionPoints, PositionComponent other) {
     super.onCollision(intersectionPoints, other);
-    if (other.runtimeType == Bullet) {
-      print(
-          "hit at: ${((intersectionPoints.first + intersectionPoints.last) / 2)}");
+    print(other);
+    if (other.runtimeType == Boulder) {
+      //print("Boulder hit");
+      speed = 0;
+    }
 
-      print("Angle: ${other.angle * 180 / pi}°");
+    if (other.runtimeType == Bullet) {
+      //print(          "hit at: ${((intersectionPoints.first + intersectionPoints.last) / 2)}");
+
+      //print("Angle: ${other.angle * 180 / pi}°");
 
       parent!.add(Blood(
           bloodPosition: position,
@@ -86,6 +93,9 @@ class Zombie extends SpriteAnimationComponent
   @override
   void update(double dt) {
     super.update(dt);
-    position += Vector2(1, 0) * kZombieSpeed * dt;
+    position += Vector2(1, 0) * speed * dt;
+    if (position.x > 1650) {
+      removeFromParent();
+    }
   }
 }

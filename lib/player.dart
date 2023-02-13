@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:flame/components.dart';
 import 'package:flame/image_composition.dart';
+import 'package:flame/rendering.dart';
 import 'package:flame/sprite.dart';
 import 'package:flutter/cupertino.dart';
 
@@ -31,6 +32,7 @@ class Player extends SpriteAnimationComponent with HasGameRef {
       (_) => {
         animation = animations[weapon][playerAction],
         anchor = Anchor(0.4, 0.6), //top left clockwise: 0,0;1,0;1,1;0,1
+        //decorator = PaintDecorator.tint(const Color(0xAAFF0000))
       },
     );
   }

@@ -3,21 +3,29 @@ import 'dart:math';
 import 'package:flame/components.dart';
 import 'package:flame/game.dart';
 import 'package:flame/palette.dart';
+import 'package:flame/rendering.dart';
 import 'package:flame/sprite.dart';
 import 'package:flutter/material.dart';
 import 'package:flame/input.dart';
+import 'package:flutter_zombie_shooter/helpers/boulder.dart';
 
 import 'package:flutter_zombie_shooter/helpers/enemy_manager.dart';
 import 'package:flutter_zombie_shooter/helpers/bullet.dart';
 import 'package:flutter_zombie_shooter/enums_and_constants/directions.dart';
 import 'package:flutter_zombie_shooter/enums_and_constants/weapons.dart';
+import 'package:flutter_zombie_shooter/helpers/tree.dart';
+import 'package:flutter_zombie_shooter/helpers/tree_manager.dart';
 import 'package:flutter_zombie_shooter/player.dart';
 import 'package:flutter_zombie_shooter/world.dart';
 
 class ShooterGame extends FlameGame
-    with PanDetector, TapDetector, HasCollisionDetection {
+    with PanDetector, TapDetector, HasCollisionDetection, HasDecorator {
   final World _world = World();
+  final Boulder _boulder = Boulder();
   final Player _player = Player();
+
+  final TreeManager _treeManager = TreeManager();
+  final EnemyManager _enemyManager = EnemyManager();
   //final Zombie _zombie = Zombie(onHit:spillBlood );
   //final List BloodList = [];
   RectangleComponent spillBlood() {
@@ -27,8 +35,6 @@ class ShooterGame extends FlameGame
       paint: BasicPalette.red.paint()..style = PaintingStyle.fill,
     );
   }
-
-  final EnemyManager _enemyManager = EnemyManager();
 
   Map<Weapon, SpriteSheet> bulletSpriteSheets = {};
 
@@ -41,18 +47,43 @@ class ShooterGame extends FlameGame
           rows: 1);
     }
     super.onLoad();
-
+    //add(ScreenHitbox()); HitBox for the size of the smartphone screen
     await add(_world);
-    await add(_player);
-    //await add(_zombie);
 
+    //await add(_boulder);
+    await add(_player);
+    //await add(_tree..position = Vector2(_world.size.x / 2, 0));
+    //await add(_zombie);
+    await add(_treeManager..priority = 4);
     await add(_enemyManager);
+
+    //sprite = await gameRef.loadSprite('map2.png');
+    /*await add(SpriteComponent()
+      ..sprite = await loadSprite('map2_tree.png')
+      ..size = Vector2(_world.size.x, _world.size.y)
+      ..priority = 4);*/
+    /*
+    await add(SpriteAnimationComponent()
+      ..animation = SpriteSheet.fromColumnsAndRows(
+              image: //await composition.compose(),
+                  await images.load("movingTree.png"),
+              columns: 20,
+              rows: 1)
+          .createAnimation(row: 0, stepTime: 0.15, from: 0, to: 19)
+      ..size = Vector2(_world.size.x, _world.size.y)
+      ..priority = 4);
+      */
+    _boulder.anchor = Anchor.bottomRight;
     //_zombie.position = _world.size / 1.5;
+    //_player.position = _world.size / 3;
+    _boulder.position = _world.size;
     _player.position = _world.size / 1.5;
     _player.priority = 3;
 
     camera.followComponent(_player,
+        //worldBounds: Rect.fromLTRB(-_world.size.x / 2, -_world.size.y / 2,            _world.size.x / 2, _world.size.y / 2));
         worldBounds: Rect.fromLTRB(0, 0, _world.size.x, _world.size.y));
+    //camera.shake();
   }
 
   int i = 0;
