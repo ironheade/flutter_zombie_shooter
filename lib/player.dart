@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:flame/collisions.dart';
 import 'package:flame/components.dart';
 import 'package:flame/image_composition.dart';
 import 'package:flame/rendering.dart';
@@ -9,10 +10,12 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter_zombie_shooter/enums_and_constants/directions.dart';
 import 'package:flutter_zombie_shooter/enums_and_constants/actions.dart';
 import 'package:flutter_zombie_shooter/enums_and_constants/weapons.dart';
+import 'package:flutter_zombie_shooter/helpers/boulder.dart';
 
 import 'enums_and_constants/constants.dart';
 
-class Player extends SpriteAnimationComponent with HasGameRef {
+class Player extends SpriteAnimationComponent
+    with CollisionCallbacks, HasGameRef {
   Player()
       : super(
           size: Vector2.all(kPlayerSize),
@@ -21,6 +24,11 @@ class Player extends SpriteAnimationComponent with HasGameRef {
   final double _animationSpeed = kPlayerAnimationSpeed;
   Direction direction = Direction(leftX: 0, leftY: 0, rightX: 0, rightY: 0);
   double storedAngle = 0;
+  double xSpeedFactor = 1;
+  double ySpeedFactor = 1;
+  double alpha = pi / 4;
+  bool onCollidable = false;
+
   Weapon weapon = Weapon.handgun;
   PlayerAction playerAction = PlayerAction.wait;
   late Map animations;
@@ -28,6 +36,8 @@ class Player extends SpriteAnimationComponent with HasGameRef {
   @override
   Future<void> onLoad() async {
     super.onLoad();
+    add(CircleHitbox(isSolid: true)..position = Vector2(0.4, 0.6));
+    debugMode = true;
     await _loadAnimations().then(
       (_) => {
         animation = animations[weapon][playerAction],
@@ -38,15 +48,72 @@ class Player extends SpriteAnimationComponent with HasGameRef {
   }
 
   @override
+  void onCollision(Set<Vector2> intersectionPoints, PositionComponent other) {
+    if (onCollidable) {
+      //Projection of the movement Vector to the resulting vector of both intersection points
+      Vector2 directionVector = Vector2(direction.leftX, direction.leftY);
+      Vector2 projectionVector =
+          intersectionPoints.first - intersectionPoints.last;
+
+      double preFactor = (directionVector.x * projectionVector.x +
+              directionVector.y * projectionVector.y) /
+          (pow(projectionVector.x, 2) + pow(projectionVector.y, 2));
+      Vector2 newDirectionVector = projectionVector * preFactor;
+
+      position += newDirectionVector;
+
+      //angle between the actual movement vector and the vector between player center and middle of intersection points
+      Vector2 vec1 =
+          (intersectionPoints.first + intersectionPoints.last) / 2 - position;
+      Vector2 vec2 = Vector2(direction.leftX, direction.leftY);
+      double angle = acos((vec1.x * vec2.x + vec1.y * vec2.y) /
+          (sqrt(pow(vec1.x, 2) + pow(vec1.y, 2)) *
+              sqrt(pow(vec2.x, 2) + pow(vec2.y, 2))));
+
+      if (angle > pi / 2) {
+        onCollidable = false;
+      }
+    }
+  }
+
+  @override
+  void onCollisionStart(
+      Set<Vector2> intersectionPoints, PositionComponent other) {
+    if (other.runtimeType == Boulder) {
+      onCollidable = true;
+    }
+  }
+
+  @override
+  void onCollisionEnd(PositionComponent other) {
+    onCollidable = false;
+  }
+
+  @override
   void update(double dt) {
     super.update(dt);
     updatePosition(dt);
+    //print(atan(direction.leftY / direction.leftX) * 180 / pi);
   }
 
   updatePosition(double dt) {
-    position.x += direction.leftX * (1 + kPlayerSpeedFactor);
-    position.y += direction.leftY * (1 + kPlayerSpeedFactor);
+    !onCollidable
+        ? position +=
+            Vector2(direction.leftX, direction.leftY) * (1 + kPlayerSpeedFactor)
+        : null;
+    //position.x += direction.leftX * (1 + kPlayerSpeedFactor) * xSpeedFactor;
+    //position.y += direction.leftY * (1 + kPlayerSpeedFactor) * ySpeedFactor;
+/*
+    direction.leftX > direction.leftY
+        ? position.x +=
+            direction.leftX * (1 + kPlayerSpeedFactor) * xSpeedFactor
+        : position.x;
 
+    direction.leftX > direction.leftY
+        ? position.y +=
+            direction.leftY * (1 + kPlayerSpeedFactor) * ySpeedFactor
+        : position.y;
+*/
     if (direction.leftX != 0 || direction.leftY != 0) {
       playerAction = PlayerAction.move;
     } else {

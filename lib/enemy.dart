@@ -65,10 +65,10 @@ class Zombie extends SpriteAnimationComponent
   @override
   void onCollision(Set<Vector2> intersectionPoints, PositionComponent other) {
     super.onCollision(intersectionPoints, other);
-    print(other);
+    //print(other);
     if (other.runtimeType == Boulder) {
       //print("Boulder hit");
-      speed = 0;
+      //speed = 0;
     }
 
     if (other.runtimeType == Bullet) {

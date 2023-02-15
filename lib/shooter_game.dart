@@ -50,40 +50,20 @@ class ShooterGame extends FlameGame
     //add(ScreenHitbox()); HitBox for the size of the smartphone screen
     await add(_world);
 
-    //await add(_boulder);
+    await add(_boulder);
     await add(_player);
-    //await add(_tree..position = Vector2(_world.size.x / 2, 0));
-    //await add(_zombie);
+
     await add(_treeManager..priority = 4);
     await add(_enemyManager);
 
-    //sprite = await gameRef.loadSprite('map2.png');
-    /*await add(SpriteComponent()
-      ..sprite = await loadSprite('map2_tree.png')
-      ..size = Vector2(_world.size.x, _world.size.y)
-      ..priority = 4);*/
-    /*
-    await add(SpriteAnimationComponent()
-      ..animation = SpriteSheet.fromColumnsAndRows(
-              image: //await composition.compose(),
-                  await images.load("movingTree.png"),
-              columns: 20,
-              rows: 1)
-          .createAnimation(row: 0, stepTime: 0.15, from: 0, to: 19)
-      ..size = Vector2(_world.size.x, _world.size.y)
-      ..priority = 4);
-      */
     _boulder.anchor = Anchor.bottomRight;
-    //_zombie.position = _world.size / 1.5;
-    //_player.position = _world.size / 3;
-    _boulder.position = _world.size;
-    _player.position = _world.size / 1.5;
+
+    _boulder.position = _world.size / 1.5;
+    _player.position = _world.size / 2;
     _player.priority = 3;
 
     camera.followComponent(_player,
-        //worldBounds: Rect.fromLTRB(-_world.size.x / 2, -_world.size.y / 2,            _world.size.x / 2, _world.size.y / 2));
         worldBounds: Rect.fromLTRB(0, 0, _world.size.x, _world.size.y));
-    //camera.shake();
   }
 
   int i = 0;
@@ -92,8 +72,6 @@ class ShooterGame extends FlameGame
         _player.weapon != Weapon.knife &&
         _player.weapon != Weapon.flashlight) {
       if (i == 0) {
-        //Bullet bullet = fireBullet(            direction, _world.size, _player.position, _player.weapon);
-        //add(bullet);
         for (var scatter in scatterBullets[_player.weapon]!) {
           add(fireBullet(
               direction, _world.size, _player.position, _player.weapon)
