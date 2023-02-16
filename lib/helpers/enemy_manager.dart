@@ -5,16 +5,18 @@ import 'package:flame/collisions.dart';
 import 'package:flame/components.dart';
 import 'package:flame/palette.dart';
 import 'package:flutter_zombie_shooter/enemy.dart';
+import 'package:flutter_zombie_shooter/player.dart';
 
 class EnemyManager extends Component with CollisionCallbacks {
   late Timer _timer;
+  late Player player;
   //RectangleComponent onHit;
-  EnemyManager() : super() {
+  EnemyManager(this.player) : super() {
     _timer = Timer(1, onTick: _spawnEnemy, repeat: true);
   }
 
   void _spawnEnemy() {
-    Zombie zombie = Zombie();
+    Zombie zombie = Zombie(player: player);
 
     zombie.position =
         Vector2(Random().nextDouble() * 400, Random().nextDouble() * 1000);

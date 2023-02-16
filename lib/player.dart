@@ -1,16 +1,20 @@
 import 'dart:math';
+import 'dart:ui';
 
 import 'package:flame/collisions.dart';
 import 'package:flame/components.dart';
 import 'package:flame/image_composition.dart';
 import 'package:flame/rendering.dart';
+
 import 'package:flame/sprite.dart';
-import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
+
+import 'package:flutter_zombie_shooter/enemy.dart';
 
 import 'package:flutter_zombie_shooter/enums_and_constants/directions.dart';
 import 'package:flutter_zombie_shooter/enums_and_constants/actions.dart';
 import 'package:flutter_zombie_shooter/enums_and_constants/weapons.dart';
-import 'package:flutter_zombie_shooter/helpers/boulder.dart';
+import 'package:flutter_zombie_shooter/functions/functions.dart';
 
 import 'enums_and_constants/constants.dart';
 
@@ -23,12 +27,8 @@ class Player extends SpriteAnimationComponent
 
   final double _animationSpeed = kPlayerAnimationSpeed;
   Direction direction = Direction(leftX: 0, leftY: 0, rightX: 0, rightY: 0);
-  double storedAngle = 0;
-  double xSpeedFactor = 1;
-  double ySpeedFactor = 1;
-  double alpha = pi / 4;
   bool onCollidable = false;
-
+  int playerHealth = 100;
   Weapon weapon = Weapon.handgun;
   PlayerAction playerAction = PlayerAction.wait;
   late Map animations;
@@ -36,42 +36,50 @@ class Player extends SpriteAnimationComponent
   @override
   Future<void> onLoad() async {
     super.onLoad();
+    /*
+    add(RectangleComponent(
+        size: Vector2(100, 12),
+        paint: Paint()..color = Colors.green,
+        position: position));
+        */
     add(CircleHitbox(isSolid: true)..position = Vector2(0.4, 0.6));
-    debugMode = true;
+
+    //debugMode = true;
     await _loadAnimations().then(
       (_) => {
         animation = animations[weapon][playerAction],
         anchor = Anchor(0.4, 0.6), //top left clockwise: 0,0;1,0;1,1;0,1
-        //decorator = PaintDecorator.tint(const Color(0xAAFF0000))
       },
     );
   }
 
   @override
   void onCollision(Set<Vector2> intersectionPoints, PositionComponent other) {
-    if (onCollidable) {
-      //Projection of the movement Vector to the resulting vector of both intersection points
-      Vector2 directionVector = Vector2(direction.leftX, direction.leftY);
-      Vector2 projectionVector =
-          intersectionPoints.first - intersectionPoints.last;
-
-      double preFactor = (directionVector.x * projectionVector.x +
-              directionVector.y * projectionVector.y) /
-          (pow(projectionVector.x, 2) + pow(projectionVector.y, 2));
-      Vector2 newDirectionVector = projectionVector * preFactor;
-
-      position += newDirectionVector;
-
-      //angle between the actual movement vector and the vector between player center and middle of intersection points
-      Vector2 vec1 =
+    if (other.runtimeType != Zombie) {
+      Vector2 vectorTowardsBox =
           (intersectionPoints.first + intersectionPoints.last) / 2 - position;
-      Vector2 vec2 = Vector2(direction.leftX, direction.leftY);
-      double angle = acos((vec1.x * vec2.x + vec1.y * vec2.y) /
-          (sqrt(pow(vec1.x, 2) + pow(vec1.y, 2)) *
-              sqrt(pow(vec2.x, 2) + pow(vec2.y, 2))));
+      Vector2 movementVector = Vector2(direction.leftX, direction.leftY);
+      double vectorAngle =
+          AngleBetweenVectors(vectorTowardsBox, movementVector);
+      if (vectorAngle < pi / 2) {
+        onCollidable = true;
+      }
+      if (onCollidable) {
+        //Projection of the movement Vector to the resulting vector of both intersection points
+        Vector2 directionVector = Vector2(direction.leftX, direction.leftY);
+        Vector2 projectionVector =
+            intersectionPoints.first - intersectionPoints.last;
 
-      if (angle > pi / 2) {
-        onCollidable = false;
+        Vector2 newDirectionVector =
+            projectVector(directionVector, projectionVector);
+
+        position += newDirectionVector;
+
+        //angle between the actual movement vector and the vector between player center and middle of intersection points
+
+        if (vectorAngle > pi / 2) {
+          onCollidable = false;
+        }
       }
     }
   }
@@ -79,79 +87,50 @@ class Player extends SpriteAnimationComponent
   @override
   void onCollisionStart(
       Set<Vector2> intersectionPoints, PositionComponent other) {
-    if (other.runtimeType == Boulder) {
+    if (other.runtimeType != Zombie) {
       onCollidable = true;
     }
   }
 
   @override
   void onCollisionEnd(PositionComponent other) {
-    onCollidable = false;
+    if (other.runtimeType != Zombie) {
+      onCollidable = false;
+    }
   }
 
   @override
   void update(double dt) {
     super.update(dt);
     updatePosition(dt);
-    //print(atan(direction.leftY / direction.leftX) * 180 / pi);
   }
 
   updatePosition(double dt) {
-    !onCollidable
-        ? position +=
-            Vector2(direction.leftX, direction.leftY) * (1 + kPlayerSpeedFactor)
-        : null;
-    //position.x += direction.leftX * (1 + kPlayerSpeedFactor) * xSpeedFactor;
-    //position.y += direction.leftY * (1 + kPlayerSpeedFactor) * ySpeedFactor;
-/*
-    direction.leftX > direction.leftY
-        ? position.x +=
-            direction.leftX * (1 + kPlayerSpeedFactor) * xSpeedFactor
-        : position.x;
-
-    direction.leftX > direction.leftY
-        ? position.y +=
-            direction.leftY * (1 + kPlayerSpeedFactor) * ySpeedFactor
-        : position.y;
-*/
-    if (direction.leftX != 0 || direction.leftY != 0) {
-      playerAction = PlayerAction.move;
-    } else {
-      playerAction = PlayerAction.wait;
+    if (!onCollidable) {
+      position +=
+          Vector2(direction.leftX, direction.leftY) * (1 + kPlayerSpeedFactor);
     }
 
-    double calculatedAngleLeft = atan(direction.leftY / direction.leftX);
-    double calculatedAngleRight = atan(direction.rightY / direction.rightX);
-    if (direction.rightX != 0 || direction.rightY != 0) {
-      if (direction.rightX < 0) {
-        angle = calculatedAngleRight + pi;
-        storedAngle = calculatedAngleRight + pi;
-      } else if (direction.rightX > 0) {
-        angle = calculatedAngleRight;
-        storedAngle = calculatedAngleRight;
-      } else {
-        angle = storedAngle;
-      }
-    } else {
-      if (direction.leftX < 0) {
-        angle = calculatedAngleLeft + pi;
-        storedAngle = calculatedAngleLeft + pi;
-      } else if (direction.leftX > 0) {
-        angle = calculatedAngleLeft;
-        storedAngle = calculatedAngleLeft;
-      } else {
-        angle = storedAngle;
-      }
+    playerAction = (Vector2(direction.leftX, direction.leftY).length > 0)
+        ? playerAction = PlayerAction.move
+        : playerAction = PlayerAction.wait;
+
+    //when there is input from the controllers, the old angle is overwritten
+    if (direction.leftX != 0 ||
+        direction.leftY != 0 ||
+        direction.rightX != 0 ||
+        direction.rightY != 0) {
+      angle = getPlayerAngle(direction);
     }
+
     animation = animations[weapon][playerAction];
   }
 
   Future<void> _loadAnimations() async {
-    /*
     ImageComposition composition = ImageComposition()
-      ..add(await gameRef.images.load("survivor-walk.png"), position)
+      ..add(await gameRef.images.load("survivor-move_rifle.png"), position)
       ..add(await gameRef.images.load("survivor-idle_shotgun.png"), position);
-*/
+
     Future<SpriteAnimation> makeAnimation(
         {required String spriteSheet,
         required int columns,
@@ -170,7 +149,7 @@ class Player extends SpriteAnimationComponent
         PlayerAction.wait: await makeAnimation(
             //spriteSheet: "survivor-idle_knife.png", columns: 20, rows: 1),
             spriteSheet: "zombie-idle.png",
-            columns: 17,
+            columns: 20,
             rows: 1),
         PlayerAction.move: await makeAnimation(
             //spriteSheet: "survivor-move_knife.png", columns: 20, rows: 1)

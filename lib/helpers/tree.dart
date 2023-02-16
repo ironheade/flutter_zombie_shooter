@@ -8,7 +8,7 @@ class Tree extends SpriteComponent with HasGameRef {
   }
 
   int i = 0;
-  int Sign = 1.sign;
+
   @override
   void update(double dt) {
     if (i > 300) {
