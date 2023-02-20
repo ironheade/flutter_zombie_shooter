@@ -10,17 +10,17 @@ import 'package:flutter_zombie_shooter/player.dart';
 class EnemyManager extends Component with CollisionCallbacks {
   late Timer _timer;
   late Player player;
+  late VoidCallback kill;
   //RectangleComponent onHit;
-  EnemyManager(this.player) : super() {
+  EnemyManager({required this.player, required this.kill}) : super() {
     _timer = Timer(1, onTick: _spawnEnemy, repeat: true);
   }
 
   void _spawnEnemy() {
-    Zombie zombie = Zombie(player: player);
-
-    zombie.position =
-        Vector2(Random().nextDouble() * 400, Random().nextDouble() * 1000);
-    zombie.priority = 2;
+    Zombie zombie = Zombie(player: player, kill: kill)
+      ..position =
+          Vector2(Random().nextDouble() * 400, Random().nextDouble() * 1000)
+      ..priority = 2;
 
     add(zombie);
   }

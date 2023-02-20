@@ -15,6 +15,7 @@ import 'package:flutter_zombie_shooter/enums_and_constants/directions.dart';
 import 'package:flutter_zombie_shooter/enums_and_constants/actions.dart';
 import 'package:flutter_zombie_shooter/enums_and_constants/weapons.dart';
 import 'package:flutter_zombie_shooter/functions/functions.dart';
+import 'package:flutter_zombie_shooter/shooter_game.dart';
 
 import 'enums_and_constants/constants.dart';
 
@@ -28,7 +29,8 @@ class Player extends SpriteAnimationComponent
   final double _animationSpeed = kPlayerAnimationSpeed;
   Direction direction = Direction(leftX: 0, leftY: 0, rightX: 0, rightY: 0);
   bool onCollidable = false;
-  int playerHealth = 100;
+  int HP = kPlayerHealthPoints;
+  int kills = 0;
   Weapon weapon = Weapon.handgun;
   PlayerAction playerAction = PlayerAction.wait;
   late Map animations;
@@ -61,6 +63,7 @@ class Player extends SpriteAnimationComponent
       Vector2 movementVector = Vector2(direction.leftX, direction.leftY);
       double vectorAngle =
           AngleBetweenVectors(vectorTowardsBox, movementVector);
+
       if (vectorAngle < pi / 2) {
         onCollidable = true;
       }
@@ -102,6 +105,9 @@ class Player extends SpriteAnimationComponent
   @override
   void update(double dt) {
     super.update(dt);
+    if (HP < 0) {
+      //game.paused = true;
+    }
     updatePosition(dt);
   }
 

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flame/game.dart';
+import 'package:flutter_zombie_shooter/dashboard/dashboard.dart';
 import 'shooter_game.dart';
 import 'helpers/navigation.dart';
 import 'package:flutter/services.dart';
@@ -17,7 +18,16 @@ void main() {
       home: Scaffold(
         body: Stack(
           children: [
-            GameWidget(game: game),
+            GameWidget(
+              game: game,
+              overlayBuilderMap: {
+                'Dashboard': (BuildContext context, ShooterGame game) {
+                  return Dashboard(
+                    game: game,
+                  );
+                }
+              },
+            ),
             Align(
               alignment: Alignment.bottomCenter,
               child: Navigation(

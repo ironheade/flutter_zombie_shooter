@@ -24,7 +24,8 @@ class ShooterGame extends FlameGame
     with PanDetector, TapDetector, HasCollisionDetection, HasDecorator {
   final World _world = World();
   final Car _car = Car();
-  //final Bullet _bullet =Bullet();
+  int kills = 0;
+  late int HP;
 
   final Player _player = Player();
 
@@ -40,12 +41,20 @@ class ShooterGame extends FlameGame
           columns: 1,
           rows: 1);
     }
-
+    overlays.add("Dashboard");
     await add(_world);
     await add(_car);
     await add(_player);
     await add(_treeManager..priority = 4);
-    await add(EnemyManager(_player));
+    await add(EnemyManager(player: _player, kill: kill));
+    await add(TextComponent(
+        text: kills.toString(),
+        textRenderer:
+            TextPaint(style: TextStyle(color: BasicPalette.blue.color)))
+      ..anchor = Anchor.topCenter
+      ..priority = 5
+      ..x = 32 // size is a property from game
+      ..y = 32.0);
 
     _car.position = _world.size / 1.6;
     _player.position = _world.size / 2;
@@ -53,6 +62,14 @@ class ShooterGame extends FlameGame
 
     camera.followComponent(_player,
         worldBounds: Rect.fromLTRB(0, 0, _world.size.x, _world.size.y));
+  }
+
+  void pauseGame() {
+    paused = !paused;
+  }
+
+  void kill() {
+    kills += 1;
   }
 
   int i = 0;
