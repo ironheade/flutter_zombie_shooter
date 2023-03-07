@@ -1,3 +1,4 @@
+import 'package:flame/components.dart';
 import 'package:flame/game.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_zombie_shooter/shooter_game.dart';
@@ -25,19 +26,32 @@ class _DashboardState extends State<Dashboard> {
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  "HP:",
-                  style: TextStyle(fontSize: 25, color: Colors.yellow.shade700),
-                ),
-                Text(
-                  "Kills: ${widget.game.kills}",
-                  style: TextStyle(fontSize: 25, color: Colors.yellow.shade700),
+                ValueListenableBuilder<int>(
+                    valueListenable: widget.game.hp,
+                    builder: (context, value, child) {
+                      return Text(
+                        "HP: ${widget.game.hp.value}",
+                        style: TextStyle(
+                            fontSize: 25, color: Colors.yellow.shade700),
+                      );
+                    }),
+                ValueListenableBuilder<int>(
+                  valueListenable: widget.game.kills,
+                  builder: (context, value, child) {
+                    return Text(
+                      "Kills: ${widget.game.kills.value}",
+                      style: TextStyle(
+                          fontSize: 25, color: Colors.yellow.shade700),
+                    );
+                  },
                 )
               ],
             ),
             IconButton(
                 onPressed: () {
-                  widget.game.pauseGame();
+                  setState(() {
+                    widget.game.paused = !widget.game.paused;
+                  });
                 },
                 icon: Icon(widget.game.paused ? Icons.play_arrow : Icons.pause))
           ],

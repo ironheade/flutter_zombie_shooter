@@ -1,21 +1,21 @@
 import 'dart:async';
 import 'dart:math';
 
-import 'package:flame/collisions.dart';
 import 'package:flame/components.dart';
 import 'package:flame/game.dart';
-import 'package:flame/palette.dart';
 import 'package:flame/rendering.dart';
+
 import 'package:flame/sprite.dart';
 import 'package:flutter/material.dart';
 import 'package:flame/input.dart';
+import 'package:flutter_zombie_shooter/enums_and_constants/constants.dart';
 import 'package:flutter_zombie_shooter/helpers/car.dart';
 
 import 'package:flutter_zombie_shooter/helpers/enemy_manager.dart';
 import 'package:flutter_zombie_shooter/helpers/bullet.dart';
 import 'package:flutter_zombie_shooter/enums_and_constants/directions.dart';
 import 'package:flutter_zombie_shooter/enums_and_constants/weapons.dart';
-import 'package:flutter_zombie_shooter/helpers/tree.dart';
+
 import 'package:flutter_zombie_shooter/helpers/tree_manager.dart';
 import 'package:flutter_zombie_shooter/player.dart';
 import 'package:flutter_zombie_shooter/world.dart';
@@ -24,8 +24,11 @@ class ShooterGame extends FlameGame
     with PanDetector, TapDetector, HasCollisionDetection, HasDecorator {
   final World _world = World();
   final Car _car = Car();
-  int kills = 0;
-  late int HP;
+
+  ValueNotifier<int> kills = ValueNotifier<int>(0);
+  ValueNotifier<int> hp = ValueNotifier<int>(kPlayerHealthPoints);
+
+  //ValueNotifier<bool> isPaused = ValueNotifier<bool>(false);
 
   final Player _player = Player();
 
@@ -46,15 +49,8 @@ class ShooterGame extends FlameGame
     await add(_car);
     await add(_player);
     await add(_treeManager..priority = 4);
-    await add(EnemyManager(player: _player, kill: kill));
-    await add(TextComponent(
-        text: kills.toString(),
-        textRenderer:
-            TextPaint(style: TextStyle(color: BasicPalette.blue.color)))
-      ..anchor = Anchor.topCenter
-      ..priority = 5
-      ..x = 32 // size is a property from game
-      ..y = 32.0);
+
+    await add(EnemyManager(player: _player));
 
     _car.position = _world.size / 1.6;
     _player.position = _world.size / 2;
@@ -62,14 +58,6 @@ class ShooterGame extends FlameGame
 
     camera.followComponent(_player,
         worldBounds: Rect.fromLTRB(0, 0, _world.size.x, _world.size.y));
-  }
-
-  void pauseGame() {
-    paused = !paused;
-  }
-
-  void kill() {
-    kills += 1;
   }
 
   int i = 0;

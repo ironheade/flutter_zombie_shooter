@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:flame/collisions.dart';
 import 'package:flame/components.dart';
+import 'package:flame/rendering.dart';
 import 'package:flame/sprite.dart';
 import 'package:flutter/animation.dart';
 import 'package:flutter_zombie_shooter/enums_and_constants/constants.dart';
@@ -11,9 +12,10 @@ import 'package:flutter_zombie_shooter/helpers/blood.dart';
 import 'package:flutter_zombie_shooter/helpers/car.dart';
 import 'package:flutter_zombie_shooter/helpers/bullet.dart';
 import 'package:flutter_zombie_shooter/player.dart';
+import 'package:flutter_zombie_shooter/shooter_game.dart';
 
 class Zombie extends SpriteAnimationComponent
-    with CollisionCallbacks, HasGameRef {
+    with CollisionCallbacks, HasGameRef<ShooterGame> {
   double _animationSpeed = kZombieAnimationSpeed;
   int healthPoints = kZombieHealthpoints;
   double speed = kZombieSpeed;
@@ -26,9 +28,10 @@ class Zombie extends SpriteAnimationComponent
   late SpriteAnimation zombieAttack;
   late SpriteAnimation zombieRun;
   late Vector2 movementVector;
-  late VoidCallback kill;
 
-  Zombie({required this.player, required this.kill})
+  final shadowDecorator = Shadow3DDecorator(angle: 180, base: Vector2(50, 50));
+
+  Zombie({required this.player})
       : super(
           size: Vector2.all(kZombieSize),
         );
@@ -68,7 +71,7 @@ class Zombie extends SpriteAnimationComponent
   @override
   Future<void> onLoad() async {
     super.onLoad();
-
+    decorator.addLast(PaintDecorator.tint(Color.fromARGB(170, 2, 0, 0)));
     for (var bloodSplashColor in bloodSpasheTypes) {
       bloodSpritesWithColor.add(
         [
@@ -88,6 +91,13 @@ class Zombie extends SpriteAnimationComponent
         //scale = Vector2.all(0.5)
       },
     );
+  }
+
+  void showBeingHit() {
+    decorator.addLast(PaintDecorator.tint(Color.fromARGB(170, 154, 18, 18)));
+    Future.delayed(Duration(milliseconds: 100), () {
+      decorator.removeLast();
+    });
   }
 
   @override
@@ -110,6 +120,7 @@ class Zombie extends SpriteAnimationComponent
   void onCollision(Set<Vector2> intersectionPoints, PositionComponent other) {
     super.onCollision(intersectionPoints, other);
     if (other.runtimeType == Bullet) {
+      showBeingHit();
       parent!.add(Blood(
           bloodPosition:
               (((intersectionPoints.first + intersectionPoints.last) / 2) +
@@ -122,9 +133,7 @@ class Zombie extends SpriteAnimationComponent
       healthPoints -= 25;
       if (healthPoints <= 0) {
         removeFromParent();
-        kill();
-        //print(player.kills);
-
+        gameRef.kills.value += 1;
       }
     }
 
@@ -178,8 +187,8 @@ class Zombie extends SpriteAnimationComponent
       scale = Vector2.all(1.3);
       speed = kZombieSpeed;
       if (i == 30) {
-        player.HP -= 1;
-        print(player.HP);
+        gameRef.hp.value -= 1;
+        //print(player.HP);
         i = 0;
       }
     } else if ((distanceVector.length > 120 && distanceVector.length < 220)) {

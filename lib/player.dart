@@ -5,8 +5,10 @@ import 'package:flame/collisions.dart';
 import 'package:flame/components.dart';
 import 'package:flame/image_composition.dart';
 import 'package:flame/rendering.dart';
+import 'package:flutter/painting.dart';
 
 import 'package:flame/sprite.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import 'package:flutter_zombie_shooter/enemy.dart';
@@ -15,6 +17,7 @@ import 'package:flutter_zombie_shooter/enums_and_constants/directions.dart';
 import 'package:flutter_zombie_shooter/enums_and_constants/actions.dart';
 import 'package:flutter_zombie_shooter/enums_and_constants/weapons.dart';
 import 'package:flutter_zombie_shooter/functions/functions.dart';
+import 'package:flutter_zombie_shooter/helpers/playerLight.dart';
 import 'package:flutter_zombie_shooter/shooter_game.dart';
 
 import 'enums_and_constants/constants.dart';
@@ -29,22 +32,28 @@ class Player extends SpriteAnimationComponent
   final double _animationSpeed = kPlayerAnimationSpeed;
   Direction direction = Direction(leftX: 0, leftY: 0, rightX: 0, rightY: 0);
   bool onCollidable = false;
-  int HP = kPlayerHealthPoints;
+  //int HP = kPlayerHealthPoints;
   int kills = 0;
   Weapon weapon = Weapon.handgun;
   PlayerAction playerAction = PlayerAction.wait;
   late Map animations;
+  final PlayerLight playerLight = PlayerLight(lightPosition: Vector2(0, 0));
 
   @override
   Future<void> onLoad() async {
     super.onLoad();
-    /*
-    add(RectangleComponent(
-        size: Vector2(100, 12),
-        paint: Paint()..color = Colors.green,
-        position: position));
-        */
-    add(CircleHitbox(isSolid: true)..position = Vector2(0.4, 0.6));
+
+    //debugMode = true;
+    add(playerLight..lightPosition = position);
+    add(ClipComponent.polygon(position: Vector2(200, -130), points: [
+      Vector2(650, 250),
+      Vector2(650, -100),
+      Vector2(200, 50),
+      Vector2(200, 100),
+    ]));
+
+    add(innerCircleHitbox());
+    //add(CircleHitbox(isSolid: true)..position = Vector2(50, 80));
 
     //debugMode = true;
     await _loadAnimations().then(
@@ -53,6 +62,30 @@ class Player extends SpriteAnimationComponent
         anchor = Anchor(0.4, 0.6), //top left clockwise: 0,0;1,0;1,1;0,1
       },
     );
+  }
+
+  CircleHitbox innerCircleHitbox() =>
+      CircleHitbox(isSolid: true)..position = Vector2(0.4, 0.6);
+
+  @override
+  void render(Canvas canvas) {
+    canvas.clipPath(Path.combine(
+        PathOperation.difference,
+        Path()..addOval(Rect.fromCircle(center: Offset(0, 0), radius: 500)),
+        Path()
+          ..addPolygon([
+            Offset(-650, -250),
+            Offset(-650, 100),
+            Offset(-20, -50),
+            Offset(-20, -100),
+          ], true)
+          ..addPolygon([
+            Offset(650, 250),
+            Offset(650, -100),
+            Offset(200, direction.leftX * 1000),
+            Offset(200, 100),
+          ], true)));
+    super.render(canvas);
   }
 
   @override
@@ -105,9 +138,6 @@ class Player extends SpriteAnimationComponent
   @override
   void update(double dt) {
     super.update(dt);
-    if (HP < 0) {
-      //game.paused = true;
-    }
     updatePosition(dt);
   }
 

@@ -3,6 +3,7 @@ import 'package:flame/sprite.dart';
 import 'package:flame/collisions.dart';
 import 'package:flame/components.dart';
 import 'package:flame/game.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter_zombie_shooter/enemy.dart';
 
 import 'package:flutter_zombie_shooter/enums_and_constants/weapons.dart';
@@ -53,6 +54,19 @@ class Bullet extends SpriteComponent with HasGameRef, CollisionCallbacks {
   Future<void> onLoad() async {
     // _LoadAinmations().then((_) => {sprite = bulletSpriteSheets[weapon]});
     add(RectangleHitbox());
+    add(CircleComponent(
+      anchor: Anchor.center,
+      radius: 100,
+      paint: Paint()
+        ..shader = RadialGradient(colors: [
+          Color.fromARGB(217, 255, 242, 182),
+          Color.fromARGB(107, 255, 242, 182)
+        ]).createShader(Rect.fromCircle(
+          center: Offset(0, 0),
+          radius: 100,
+        )),
+      position: position,
+    ));
     super.onLoad();
   }
 
