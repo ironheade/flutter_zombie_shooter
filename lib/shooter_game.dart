@@ -8,13 +8,17 @@ import 'package:flame/rendering.dart';
 import 'package:flame/sprite.dart';
 import 'package:flutter/material.dart';
 import 'package:flame/input.dart';
+import 'package:flutter_zombie_shooter/enemy.dart';
 import 'package:flutter_zombie_shooter/enums_and_constants/constants.dart';
+import 'package:flutter_zombie_shooter/enums_and_constants/mapComponents.dart';
 import 'package:flutter_zombie_shooter/helpers/car.dart';
 
 import 'package:flutter_zombie_shooter/helpers/enemy_manager.dart';
 import 'package:flutter_zombie_shooter/helpers/bullet.dart';
 import 'package:flutter_zombie_shooter/enums_and_constants/directions.dart';
 import 'package:flutter_zombie_shooter/enums_and_constants/weapons.dart';
+import 'package:flutter_zombie_shooter/helpers/playerLight.dart';
+import 'package:flutter_zombie_shooter/helpers/streetLamp.dart';
 
 import 'package:flutter_zombie_shooter/helpers/tree_manager.dart';
 import 'package:flutter_zombie_shooter/player.dart';
@@ -31,6 +35,11 @@ class ShooterGame extends FlameGame
   //ValueNotifier<bool> isPaused = ValueNotifier<bool>(false);
 
   final Player _player = Player();
+  late PlayerLight torch = PlayerLight(
+      lightPosition: Vector2.all(500),
+      lightRadius: 200,
+      playerTorch: true,
+      primaryLighColour: Color.fromARGB(172, 182, 255, 249));
 
   final TreeManager _treeManager = TreeManager();
   //final EnemyManager _enemyManager = EnemyManager(_player);
@@ -46,14 +55,44 @@ class ShooterGame extends FlameGame
     }
     overlays.add("Dashboard");
     await add(_world);
-    await add(_car);
+    await add(_car..priority = 3);
     await add(_player);
     await add(_treeManager..priority = 4);
 
-    await add(EnemyManager(player: _player));
+//head and tail lights of the car
+    await add(PlayerLight(
+        lightRadius: 70,
+        lightPosition:
+            Vector2(_world.size.x / 1.6 + 120, _world.size.y / 1.6 - 70))
+      ..priority = 1);
+    await add(PlayerLight(
+        lightRadius: 70,
+        lightPosition:
+            Vector2(_world.size.x / 1.6 + 75, _world.size.y / 1.6 - 120))
+      ..priority = 1);
+    await add(PlayerLight(
+        lightRadius: 50,
+        primaryLighColour: Color.fromARGB(172, 192, 8, 8),
+        lightPosition:
+            Vector2(_world.size.x / 1.6 - 125, _world.size.y / 1.6 + 80))
+      ..priority = 1);
+    await add(PlayerLight(
+        lightRadius: 50,
+        primaryLighColour: Color.fromARGB(172, 192, 8, 8),
+        lightPosition:
+            Vector2(_world.size.x / 1.6 - 65, _world.size.y / 1.6 + 135))
+      ..priority = 1);
 
+    await add(torch..priority = 2);
+
+    await add(EnemyManager(player: _player)..priority = 2);
+
+    for (var streetLampPosition in streetLampPositions) {
+      add(StreetLamp(streetLampPosition: streetLampPosition));
+    }
     _car.position = _world.size / 1.6;
     _player.position = _world.size / 2;
+    torch.position = _player.position;
     _player.priority = 3;
 
     camera.followComponent(_player,
@@ -77,6 +116,9 @@ class ShooterGame extends FlameGame
         i = 0;
       }
     }
+    torch.position = _player.position
+        // +Vector2(cos(_player.absoluteAngle), sin(_player.absoluteAngle)) * 80
+        ;
 
     _player.direction = direction;
   }
@@ -89,6 +131,7 @@ class ShooterGame extends FlameGame
       damage: 25,
       directionAngle: _player.absoluteAngle,
     )
+      ..priority = 3
       ..directionAngle -= pi / 180 * scatter
       ..angle -= pi / 180 * scatter);
   }

@@ -7,12 +7,15 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter_zombie_shooter/enemy.dart';
 
 import 'package:flutter_zombie_shooter/enums_and_constants/weapons.dart';
+import 'package:flutter_zombie_shooter/helpers/playerLight.dart';
+import 'package:flutter_zombie_shooter/helpers/streetLamp.dart';
 import 'package:flutter_zombie_shooter/player.dart';
+import 'package:flutter_zombie_shooter/world.dart';
 
 class Bullet extends SpriteComponent with HasGameRef, CollisionCallbacks {
   final double _speed = 1000;
   double directionAngle;
-
+  List collisionRuntimetypes = [World, Zombie, StreetLamp];
   NotifyingVector2 worldSize;
 
   late SpriteSheet spriteSheet;
@@ -54,35 +57,17 @@ class Bullet extends SpriteComponent with HasGameRef, CollisionCallbacks {
   Future<void> onLoad() async {
     // _LoadAinmations().then((_) => {sprite = bulletSpriteSheets[weapon]});
     add(RectangleHitbox());
-    add(CircleComponent(
-      anchor: Anchor.center,
-      radius: 100,
-      paint: Paint()
-        ..shader = RadialGradient(colors: [
-          Color.fromARGB(217, 255, 242, 182),
-          Color.fromARGB(107, 255, 242, 182)
-        ]).createShader(Rect.fromCircle(
-          center: Offset(0, 0),
-          radius: 100,
-        )),
-      position: position,
-    ));
+
+    add(PlayerLight(lightPosition: Vector2.all(1), lightRadius: 10)
+      ..priority = 5);
     super.onLoad();
   }
 
-/*
-  Future<void> _LoadAinmations() async {
-    for (Weapon weapon in weaponBulletSprites.keys) {
-      bulletSpriteSheets[weapon] =
-          await Sprite.load(weaponBulletSprites[weapon]!);
-    }
-  }
-*/
   @override
   void onCollision(Set<Vector2> intersectionPoints, PositionComponent other) {
     super.onCollision(intersectionPoints, other);
 
-    if (other.runtimeType == Zombie) {
+    if (collisionRuntimetypes.contains(other.runtimeType)) {
       removeFromParent();
     }
   }
@@ -92,12 +77,13 @@ class Bullet extends SpriteComponent with HasGameRef, CollisionCallbacks {
     super.update(dt);
 
     position += getVecorFromAngle(directionAngle) * _speed * dt;
-
+/*
     if (position.y < 0 ||
         position.x < 0 ||
         position.y > worldSize.y ||
         position.x > worldSize.x) {
       removeFromParent();
     }
+    */
   }
 }

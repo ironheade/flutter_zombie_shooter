@@ -17,8 +17,11 @@ import 'package:flutter_zombie_shooter/enums_and_constants/directions.dart';
 import 'package:flutter_zombie_shooter/enums_and_constants/actions.dart';
 import 'package:flutter_zombie_shooter/enums_and_constants/weapons.dart';
 import 'package:flutter_zombie_shooter/functions/functions.dart';
+import 'package:flutter_zombie_shooter/helpers/car.dart';
 import 'package:flutter_zombie_shooter/helpers/playerLight.dart';
+import 'package:flutter_zombie_shooter/helpers/streetLamp.dart';
 import 'package:flutter_zombie_shooter/shooter_game.dart';
+import 'package:flutter_zombie_shooter/world.dart';
 
 import 'enums_and_constants/constants.dart';
 
@@ -37,25 +40,13 @@ class Player extends SpriteAnimationComponent
   Weapon weapon = Weapon.handgun;
   PlayerAction playerAction = PlayerAction.wait;
   late Map animations;
-  final PlayerLight playerLight = PlayerLight(lightPosition: Vector2(0, 0));
+  List collisionRuntimetypes = [Car, StreetLamp, World];
 
   @override
   Future<void> onLoad() async {
     super.onLoad();
-
     //debugMode = true;
-    add(playerLight..lightPosition = position);
-    add(ClipComponent.polygon(position: Vector2(200, -130), points: [
-      Vector2(650, 250),
-      Vector2(650, -100),
-      Vector2(200, 50),
-      Vector2(200, 100),
-    ]));
-
-    add(innerCircleHitbox());
-    //add(CircleHitbox(isSolid: true)..position = Vector2(50, 80));
-
-    //debugMode = true;
+    add(CircleHitbox(isSolid: true)..position = Vector2(0.4, 0.6));
     await _loadAnimations().then(
       (_) => {
         animation = animations[weapon][playerAction],
@@ -64,33 +55,9 @@ class Player extends SpriteAnimationComponent
     );
   }
 
-  CircleHitbox innerCircleHitbox() =>
-      CircleHitbox(isSolid: true)..position = Vector2(0.4, 0.6);
-
-  @override
-  void render(Canvas canvas) {
-    canvas.clipPath(Path.combine(
-        PathOperation.difference,
-        Path()..addOval(Rect.fromCircle(center: Offset(0, 0), radius: 500)),
-        Path()
-          ..addPolygon([
-            Offset(-650, -250),
-            Offset(-650, 100),
-            Offset(-20, -50),
-            Offset(-20, -100),
-          ], true)
-          ..addPolygon([
-            Offset(650, 250),
-            Offset(650, -100),
-            Offset(200, direction.leftX * 1000),
-            Offset(200, 100),
-          ], true)));
-    super.render(canvas);
-  }
-
   @override
   void onCollision(Set<Vector2> intersectionPoints, PositionComponent other) {
-    if (other.runtimeType != Zombie) {
+    if (collisionRuntimetypes.contains(other.runtimeType)) {
       Vector2 vectorTowardsBox =
           (intersectionPoints.first + intersectionPoints.last) / 2 - position;
       Vector2 movementVector = Vector2(direction.leftX, direction.leftY);
@@ -123,14 +90,14 @@ class Player extends SpriteAnimationComponent
   @override
   void onCollisionStart(
       Set<Vector2> intersectionPoints, PositionComponent other) {
-    if (other.runtimeType != Zombie) {
+    if (collisionRuntimetypes.contains(other.runtimeType)) {
       onCollidable = true;
     }
   }
 
   @override
   void onCollisionEnd(PositionComponent other) {
-    if (other.runtimeType != Zombie) {
+    if (collisionRuntimetypes.contains(other.runtimeType)) {
       onCollidable = false;
     }
   }

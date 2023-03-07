@@ -128,7 +128,8 @@ class Zombie extends SpriteAnimationComponent
                   2,
           sprite: bloodSpritesWithColor[bloodSplashType]
               [Random().nextInt(bloodSpasheTypes[bloodSplashType].length)],
-          angle: other.angle));
+          angle: other.angle)
+        ..priority = 1);
 
       healthPoints -= 25;
       if (healthPoints <= 0) {

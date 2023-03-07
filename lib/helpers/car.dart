@@ -4,6 +4,7 @@ import 'package:flame/collisions.dart';
 import 'package:flame/components.dart';
 import 'package:flame/rendering.dart';
 import 'package:flutter/animation.dart';
+import 'package:flutter_zombie_shooter/helpers/playerLight.dart';
 import 'package:flutter_zombie_shooter/player.dart';
 
 class Car extends SpriteComponent with HasGameRef {
