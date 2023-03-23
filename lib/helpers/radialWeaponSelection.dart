@@ -9,11 +9,14 @@ import '../enums_and_constants/constants.dart';
 
 class RadialWeaponSelection extends StatefulWidget {
   final ValueChanged<Weapon>? onWeaponChanged;
+  late ValueNotifier<Map<Weapon, int>> ammunition;
+  late ValueNotifier<Map<Weapon, int>> magazine;
 
-  const RadialWeaponSelection({
-    Key? key,
-    required this.onWeaponChanged,
-  });
+  RadialWeaponSelection(
+      {Key? key,
+      required this.onWeaponChanged,
+      required this.ammunition,
+      required this.magazine});
 
   @override
   State<RadialWeaponSelection> createState() => _RadialWeaponSelectionState();
@@ -45,6 +48,8 @@ class _RadialWeaponSelectionState extends State<RadialWeaponSelection>
   Widget build(BuildContext context) {
     Weapon weapon = Weapon.handgun;
     return RadialAnimation(
+        magazine: widget.magazine,
+        ammunition: widget.ammunition,
         controller: controller,
         onWeaponChanged: onWeaponChanged,
         changeWeaponOnWheel: changeWeaponOnWheel,
@@ -54,8 +59,12 @@ class _RadialWeaponSelectionState extends State<RadialWeaponSelection>
 
 // The Animation
 class RadialAnimation extends StatelessWidget {
+  late ValueNotifier<Map<Weapon, int>> magazine;
+  late ValueNotifier<Map<Weapon, int>> ammunition;
   RadialAnimation(
       {super.key,
+      required this.magazine,
+      required this.ammunition,
       required this.controller,
       required this.onWeaponChanged,
       required this.weapon,
@@ -100,7 +109,7 @@ class RadialAnimation extends StatelessWidget {
     _close();
   }
 
-  build(context) {
+  build(BuildContext context) {
     return AnimatedBuilder(
         animation: controller,
         builder: (context, builder) {
@@ -120,24 +129,70 @@ class RadialAnimation extends StatelessWidget {
                     loadStatus: 1,
                     onTap: () => switchWeaponTo(Weapon.knife),
                     translation: translation),
+                ValueListenableBuilder(
+                    valueListenable: magazine,
+                    builder: (context, value, child) {
+                      return BuildButton(
+                          angle: 249,
+                          image: "assets/images/gun_icon.png",
+                          loadStatus: (ammunition.value[Weapon.handgun]! +
+                                      magazine.value[Weapon.handgun]!)
+                                  .toDouble() /
+                              (ammunitionCapacity[Weapon.handgun]! +
+                                  magazineCapacity[Weapon.handgun]!),
+                          onTap: () => switchWeaponTo(Weapon.handgun),
+                          translation: translation);
+                    }),
+                ValueListenableBuilder(
+                    valueListenable: magazine,
+                    builder: (context, value, child) {
+                      return BuildButton(
+                          angle: 291,
+                          image: "assets/images/rifle.png",
+                          loadStatus: (ammunition.value[Weapon.rifle]! +
+                                      magazine.value[Weapon.rifle]!)
+                                  .toDouble() /
+                              (ammunitionCapacity[Weapon.rifle]! +
+                                  magazineCapacity[Weapon.rifle]!),
+                          onTap: () => switchWeaponTo(Weapon.rifle),
+                          translation: translation);
+                    }),
+                ValueListenableBuilder(
+                    valueListenable: magazine,
+                    builder: (context, value, child) {
+                      return BuildButton(
+                          angle: 333,
+                          image: "assets/images/shotgun.png",
+                          loadStatus: (ammunition.value[Weapon.shotgun]! +
+                                      magazine.value[Weapon.shotgun]!)
+                                  .toDouble() /
+                              (ammunitionCapacity[Weapon.shotgun]! +
+                                  magazineCapacity[Weapon.shotgun]!),
+                          onTap: () => switchWeaponTo(Weapon.shotgun),
+                          translation: translation);
+                    }),
+                /*
                 BuildButton(
                     angle: 249,
                     image: "assets/images/gun_icon.png",
-                    loadStatus: 0.9,
+                    loadStatus: 0.1,
                     onTap: () => switchWeaponTo(Weapon.handgun),
                     translation: translation),
+                    
                 BuildButton(
                     angle: 291,
                     image: "assets/images/rifle.png",
                     loadStatus: 0.6,
                     onTap: () => switchWeaponTo(Weapon.rifle),
                     translation: translation),
+                    
                 BuildButton(
                     angle: 333,
                     image: "assets/images/shotgun.png",
-                    loadStatus: 0.1,
+                    loadStatus: 0.5,
                     onTap: () => switchWeaponTo(Weapon.shotgun),
                     translation: translation),
+                    */
                 Transform.scale(
                     scale: scale.value -
                         1.5, // subtract the beginning value to run the opposite animation

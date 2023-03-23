@@ -1,3 +1,4 @@
+import 'package:flame/components.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_zombie_shooter/enums_and_constants/directions.dart';
 import 'package:flutter_joystick/flutter_joystick.dart';
@@ -8,11 +9,15 @@ import '../enums_and_constants/constants.dart';
 class Navigation extends StatefulWidget {
   final ValueChanged<Direction>? onDirectionChanged;
   final ValueChanged<Weapon>? onWeaponChanged;
+  late ValueNotifier<Map<Weapon, int>> ammunition;
+  late ValueNotifier<Map<Weapon, int>> magazine;
 
-  const Navigation(
+  Navigation(
       {Key? key,
       required this.onDirectionChanged,
-      required this.onWeaponChanged})
+      required this.onWeaponChanged,
+      required this.ammunition,
+      required this.magazine})
       : super(key: key);
 
   @override
@@ -42,8 +47,9 @@ class _NavigationState extends State<Navigation> {
             }),
           ),
           RadialWeaponSelection(
-            onWeaponChanged: onWeaponChanged,
-          ),
+              onWeaponChanged: onWeaponChanged,
+              ammunition: widget.ammunition,
+              magazine: widget.magazine),
           JoyStick(
             listener: ((details) {
               direction.rightX = details.x;
@@ -74,7 +80,7 @@ class JoyStick extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Joystick(
-      period: Duration(milliseconds: kContollerPeriodMS),
+      period: Duration(milliseconds: kControllerPeriodMS),
       listener: listener,
       base: Container(
         width: 130,

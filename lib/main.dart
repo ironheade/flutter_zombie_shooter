@@ -31,9 +31,10 @@ void main() {
             Align(
               alignment: Alignment.bottomCenter,
               child: Navigation(
-                onDirectionChanged: game.onDirectionChanged,
-                onWeaponChanged: game.onWeaponChanged,
-              ),
+                  onDirectionChanged: game.onDirectionChanged,
+                  onWeaponChanged: game.onWeaponChanged,
+                  ammunition: game.ammunition,
+                  magazine: game.magazine),
             ),
           ],
         ),

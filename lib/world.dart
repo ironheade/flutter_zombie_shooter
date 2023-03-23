@@ -11,7 +11,7 @@ class World extends SpriteComponent with HasGameRef {
     debugMode = true;
     decorator.addLast(PaintDecorator.tint(Color.fromARGB(220, 2, 0, 0)));
 
-    sprite = await gameRef.loadSprite('map2.png');
+    sprite = await gameRef.loadSprite('map.png');
     size = sprite!.originalSize;
     add(RectangleHitbox(size: size, position: Vector2.all(0)));
   }

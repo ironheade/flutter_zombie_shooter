@@ -15,10 +15,10 @@ class StreetLamp extends PositionComponent {
     super.onLoad();
     parent!
         .add(PlayerLight(lightPosition: streetLampPosition, lightRadius: 200));
-    add(RectangleHitbox(
+    /*add(RectangleHitbox(
         size: Vector2.all(20),
         anchor: Anchor.center,
-        position: Vector2.all(0)));
+        position: Vector2.all(0)));*/
     parent!.add(CircleComponent(
         radius: 20,
         position: streetLampPosition,

@@ -4,6 +4,7 @@ import 'dart:ui';
 import 'package:flame/collisions.dart';
 import 'package:flame/components.dart';
 import 'package:flame/image_composition.dart';
+import 'package:flame/particles.dart';
 import 'package:flame/rendering.dart';
 import 'package:flutter/painting.dart';
 
@@ -42,6 +43,13 @@ class Player extends SpriteAnimationComponent
   late Map animations;
   List collisionRuntimetypes = [Car, StreetLamp, World];
 
+  double _speed = 300;
+  Random _random = Random();
+
+  Vector2 getRandomVector() {
+    return Vector2.random(_random) * 500;
+  }
+
   @override
   Future<void> onLoad() async {
     super.onLoad();
@@ -50,7 +58,7 @@ class Player extends SpriteAnimationComponent
     await _loadAnimations().then(
       (_) => {
         animation = animations[weapon][playerAction],
-        anchor = Anchor(0.4, 0.6), //top left clockwise: 0,0;1,0;1,1;0,1
+        anchor = const Anchor(0.4, 0.6), //top left clockwise: 0,0;1,0;1,1;0,1
       },
     );
   }
@@ -104,6 +112,24 @@ class Player extends SpriteAnimationComponent
 
   @override
   void update(double dt) {
+    /*
+    add(ParticleSystemComponent(
+        particle: Particle.generate(
+            count: 10,
+            lifespan: 1,
+            generator: (i) {
+              return MovingParticle(
+                // Will move from corner to corner of the game canvas.
+                from: Vector2.all(40),
+                to: Vector2(Random().nextInt(20).toDouble(),
+                    Random().nextInt(20).toDouble()),
+                child: CircleParticle(
+                  radius: 2.0,
+                  paint: Paint()..color = Color.fromARGB(255, 112, 0, 0),
+                ),
+              );
+            })));
+            */
     super.update(dt);
     updatePosition(dt);
   }
@@ -114,9 +140,25 @@ class Player extends SpriteAnimationComponent
           Vector2(direction.leftX, direction.leftY) * (1 + kPlayerSpeedFactor);
     }
 
-    playerAction = (Vector2(direction.leftX, direction.leftY).length > 0)
-        ? playerAction = PlayerAction.move
-        : playerAction = PlayerAction.wait;
+    if (playerAction == PlayerAction.reload) {
+      Future.delayed(Duration(milliseconds: weaponReloadMS[weapon]!), () {
+        if (Vector2(direction.rightX, direction.rightY).length > 0.8) {
+          playerAction = PlayerAction.shoot;
+        } else if (Vector2(direction.leftX, direction.leftY).length > 0) {
+          playerAction = PlayerAction.move;
+        } else {
+          playerAction = PlayerAction.wait;
+        }
+      });
+    } else {
+      if (Vector2(direction.rightX, direction.rightY).length > 0.8) {
+        playerAction = PlayerAction.shoot;
+      } else if (Vector2(direction.leftX, direction.leftY).length > 0) {
+        playerAction = PlayerAction.move;
+      } else {
+        playerAction = PlayerAction.wait;
+      }
+    }
 
     //when there is input from the controllers, the old angle is overwritten
     if (direction.leftX != 0 ||
@@ -130,53 +172,81 @@ class Player extends SpriteAnimationComponent
   }
 
   Future<void> _loadAnimations() async {
+    /*
     ImageComposition composition = ImageComposition()
       ..add(await gameRef.images.load("survivor-move_rifle.png"), position)
       ..add(await gameRef.images.load("survivor-idle_shotgun.png"), position);
-
-    Future<SpriteAnimation> makeAnimation(
-        {required String spriteSheet,
-        required int columns,
-        required int rows}) async {
+*/
+    Future<SpriteAnimation> makeAnimation({
+      required String spriteSheet,
+      required int columns,
+      required int rows,
+      double stepTimeFactor = 1,
+      bool loop = true,
+    }) async {
       return SpriteSheet.fromColumnsAndRows(
               image: //await composition.compose(),
                   await gameRef.images.load(spriteSheet),
               columns: columns,
               rows: rows)
           .createAnimation(
-              row: 0, stepTime: _animationSpeed, from: 0, to: columns - 1);
+              row: 0,
+              stepTime: _animationSpeed * stepTimeFactor,
+              from: 0,
+              to: columns - 1,
+              loop: loop);
     }
 
     animations = {
       Weapon.knife: {
         PlayerAction.wait: await makeAnimation(
-            //spriteSheet: "survivor-idle_knife.png", columns: 20, rows: 1),
-            spriteSheet: "zombie-idle.png",
-            columns: 20,
-            rows: 1),
+            spriteSheet: "survivor-idle_knife.png", columns: 20, rows: 1),
         PlayerAction.move: await makeAnimation(
-            //spriteSheet: "survivor-move_knife.png", columns: 20, rows: 1)
-            spriteSheet: "zombie-move.png",
-            columns: 17,
-            rows: 1)
+            spriteSheet: "survivor-move_knife.png", columns: 20, rows: 1),
+        PlayerAction.shoot: await makeAnimation(
+            spriteSheet: "survivor-meleeattack_knife.png",
+            columns: 15,
+            rows: 1,
+            stepTimeFactor: weaponFireAnimationFactor[Weapon.knife]!),
       },
       Weapon.handgun: {
         PlayerAction.wait: await makeAnimation(
             spriteSheet: "survivor-idle_handgun.png", columns: 20, rows: 1),
         PlayerAction.move: await makeAnimation(
-            spriteSheet: "survivor-move_handgun.png", columns: 20, rows: 1)
+            spriteSheet: "survivor-move_handgun.png", columns: 20, rows: 1),
+        PlayerAction.reload: await makeAnimation(
+            spriteSheet: "survivor-reload_handgun.png", columns: 15, rows: 1),
+        PlayerAction.shoot: await makeAnimation(
+            spriteSheet: "survivor-shoot_handgun.png",
+            columns: 3,
+            rows: 1,
+            stepTimeFactor: weaponFireAnimationFactor[Weapon.handgun]!),
       },
       Weapon.rifle: {
         PlayerAction.wait: await makeAnimation(
             spriteSheet: "survivor-idle_rifle.png", columns: 20, rows: 1),
         PlayerAction.move: await makeAnimation(
-            spriteSheet: "survivor-move_rifle.png", columns: 20, rows: 1)
+            spriteSheet: "survivor-move_rifle.png", columns: 20, rows: 1),
+        PlayerAction.reload: await makeAnimation(
+            spriteSheet: "survivor-reload_rifle.png", columns: 20, rows: 1),
+        PlayerAction.shoot: await makeAnimation(
+            spriteSheet: "survivor-shoot_rifle.png",
+            columns: 3,
+            rows: 1,
+            stepTimeFactor: weaponFireAnimationFactor[Weapon.rifle]!),
       },
       Weapon.shotgun: {
         PlayerAction.wait: await makeAnimation(
             spriteSheet: "survivor-idle_shotgun.png", columns: 20, rows: 1),
         PlayerAction.move: await makeAnimation(
-            spriteSheet: "survivor-move_shotgun.png", columns: 20, rows: 1)
+            spriteSheet: "survivor-move_shotgun.png", columns: 20, rows: 1),
+        PlayerAction.reload: await makeAnimation(
+            spriteSheet: "survivor-reload_shotgun.png", columns: 20, rows: 1),
+        PlayerAction.shoot: await makeAnimation(
+            spriteSheet: "survivor-shoot_shotgun.png",
+            columns: 3,
+            rows: 1,
+            stepTimeFactor: weaponFireAnimationFactor[Weapon.shotgun]!),
       },
     };
   }

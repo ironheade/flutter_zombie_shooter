@@ -44,6 +44,18 @@ class _DashboardState extends State<Dashboard> {
                           fontSize: 25, color: Colors.yellow.shade700),
                     );
                   },
+                ),
+                ValueListenableBuilder<String>(
+                  valueListenable: widget.game.ammo,
+                  builder: (context, value, child) {
+                    return Text(
+                      widget.game.ammo.value == "null/null"
+                          ? ""
+                          : widget.game.ammo.value,
+                      style: TextStyle(
+                          fontSize: 25, color: Colors.yellow.shade700),
+                    );
+                  },
                 )
               ],
             ),

@@ -4,12 +4,37 @@ enum Weapon { rifle, shotgun, handgun, knife, flashlight }
 
 enum Offsets { x, y }
 
-Map<Weapon, num> weaponDelaysMS = {
-  Weapon.handgun: 80,
-  Weapon.rifle: 20,
-  Weapon.shotgun: 110,
+//MS that pass before a bullet is fired
+Map<Weapon, int> weaponDelaysMS = {
+  Weapon.handgun: 400,
+  Weapon.rifle: 50,
+  Weapon.shotgun: 700,
   Weapon.flashlight: 10,
   Weapon.knife: 10
+};
+
+Map<Weapon, int> weaponReloadMS = {
+  Weapon.handgun: 1000,
+  Weapon.rifle: 1000,
+  Weapon.shotgun: 1000,
+};
+Map<Weapon, int> magazineCapacity = {
+  Weapon.handgun: 20,
+  Weapon.rifle: 50,
+  Weapon.shotgun: 5,
+};
+Map<Weapon, int> ammunitionCapacity = {
+  Weapon.handgun: 100,
+  Weapon.rifle: 250,
+  Weapon.shotgun: 30,
+};
+//different animation speeds
+Map<Weapon, double> weaponFireAnimationFactor = {
+  Weapon.handgun: 5,
+  Weapon.rifle: 1,
+  Weapon.shotgun: 5,
+  Weapon.flashlight: 1,
+  Weapon.knife: 1
 };
 
 Map<Weapon, List<int>> scatterBullets = {

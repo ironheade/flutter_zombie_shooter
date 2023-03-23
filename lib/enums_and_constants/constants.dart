@@ -1,7 +1,7 @@
 double kControllerPaddingAsScreenWidthPercentage = 0.1;
 double kControllerPaddingAsScreenHeightPercentage = 0.1;
 
-int kContollerPeriodMS = 10;
+int kControllerPeriodMS = 10;
 
 double kPlayerSize = 100;
 double kPlayerAnimationSpeed = 0.05;

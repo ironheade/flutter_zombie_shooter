@@ -2,9 +2,12 @@ import 'dart:math';
 
 import 'package:flame/collisions.dart';
 import 'package:flame/components.dart';
+import 'package:flame/particles.dart';
 import 'package:flame/rendering.dart';
 import 'package:flame/sprite.dart';
 import 'package:flutter/animation.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_zombie_shooter/enums_and_constants/constants.dart';
 import 'package:flutter_zombie_shooter/enums_and_constants/enemies.dart';
 import 'package:flutter_zombie_shooter/functions/functions.dart';
@@ -80,6 +83,22 @@ class Zombie extends SpriteAnimationComponent
         ],
       );
     }
+    add(ParticleSystemComponent(
+        particle: Particle.generate(
+            count: 10,
+            lifespan: 1,
+            generator: (i) {
+              return MovingParticle(
+                // Will move from corner to corner of the game canvas.
+                from: Vector2.all(40),
+                to: Vector2(Random().nextInt(20).toDouble(),
+                    Random().nextInt(20).toDouble()),
+                child: CircleParticle(
+                  radius: 2.0,
+                  paint: Paint()..color = Color.fromARGB(255, 112, 0, 0),
+                ),
+              );
+            })));
 
     add(RectangleHitbox()
       ..collisionType = CollisionType.passive
@@ -116,11 +135,31 @@ class Zombie extends SpriteAnimationComponent
     }
   }
 
+  void Bleed() {
+    add(ParticleSystemComponent(
+        particle: Particle.generate(
+            count: 10,
+            lifespan: 1,
+            generator: (i) {
+              return MovingParticle(
+                from: Vector2.all(0),
+                to: Vector2(Random().nextInt(40).toDouble(),
+                    Random().nextInt(40).toDouble()),
+                child: CircleParticle(
+                  radius: 2.0,
+                  paint: Paint()..color = Color.fromARGB(255, 131, 18, 18),
+                ),
+              );
+            })));
+  }
+
   @override
   void onCollision(Set<Vector2> intersectionPoints, PositionComponent other) {
     super.onCollision(intersectionPoints, other);
     if (other.runtimeType == Bullet) {
       showBeingHit();
+      //Bleed();
+
       parent!.add(Blood(
           bloodPosition:
               (((intersectionPoints.first + intersectionPoints.last) / 2) +
@@ -129,7 +168,7 @@ class Zombie extends SpriteAnimationComponent
           sprite: bloodSpritesWithColor[bloodSplashType]
               [Random().nextInt(bloodSpasheTypes[bloodSplashType].length)],
           angle: other.angle)
-        ..priority = 1);
+        ..priority = 0);
 
       healthPoints -= 25;
       if (healthPoints <= 0) {
@@ -186,7 +225,7 @@ class Zombie extends SpriteAnimationComponent
       i += 1;
       animation = zombieAttack;
       scale = Vector2.all(1.3);
-      speed = kZombieSpeed;
+      speed = kZombieSpeed * 0;
       if (i == 30) {
         gameRef.hp.value -= 1;
         //print(player.HP);

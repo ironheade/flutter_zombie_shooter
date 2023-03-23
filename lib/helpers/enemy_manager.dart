@@ -18,8 +18,7 @@ class EnemyManager extends Component with CollisionCallbacks {
 
   void _spawnEnemy() {
     Zombie zombie = Zombie(player: player)
-      ..position =
-          Vector2(Random().nextDouble() * 400, Random().nextDouble() * 1000)
+      ..position = Vector2(400 + Random().nextDouble() * 400, 1250)
       ..priority = 2;
 
     add(zombie);

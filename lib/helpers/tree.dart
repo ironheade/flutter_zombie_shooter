@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flame/components.dart';
 
 class Tree extends SpriteComponent with HasGameRef {
@@ -7,9 +9,10 @@ class Tree extends SpriteComponent with HasGameRef {
     size = sprite!.originalSize;
   }
 
+/*
   int i = 0;
-
-  @override
+  
+    @override
   void update(double dt) {
     if (i > 300) {
       angle += 0.025 * dt;
@@ -22,5 +25,11 @@ class Tree extends SpriteComponent with HasGameRef {
       i = 0;
     }
     ;
+  }*/
+  int i = 0;
+  @override
+  void update(double dt) {
+    angle = sin(i / 120) / 30;
+    i++;
   }
 }
