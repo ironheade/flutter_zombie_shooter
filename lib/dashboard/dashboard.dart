@@ -1,5 +1,6 @@
 import 'package:flame/components.dart';
 import 'package:flame/game.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_zombie_shooter/enums_and_constants/constants.dart';
 import 'package:flutter_zombie_shooter/enums_and_constants/weapons.dart';
@@ -23,6 +24,7 @@ class _DashboardState extends State<Dashboard> {
         padding: const EdgeInsets.all(8.0),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -78,22 +80,23 @@ class _DashboardState extends State<Dashboard> {
             Row(
               children: [
                 ValueListenableBuilder(
-                    valueListenable: widget.game.hp,
-                    builder: (context, value, child) {
-                      return widget.game.hp.value < 1
-                          ? IconButton(
-                              onPressed: () {
-                                widget.game.ResetGame();
-                                print("restart?");
-                              },
-                              icon: Icon(
-                                Icons.refresh_sharp,
-                                color: Colors.yellow.shade700,
-                                size: 110,
-                              ),
-                            )
-                          : Text("");
-                    }),
+                  valueListenable: widget.game.hp,
+                  builder: (context, value, child) {
+                    return widget.game.hp.value < 1
+                        ? IconButton(
+                            padding: EdgeInsets.zero,
+                            onPressed: () {
+                              widget.game.ResetGame();
+                            },
+                            icon: Icon(
+                              Icons.refresh_sharp,
+                              color: Colors.yellow.shade700,
+                            ),
+                            iconSize: 110,
+                          )
+                        : Text("");
+                  },
+                ),
               ],
             ),
             Column(children: [

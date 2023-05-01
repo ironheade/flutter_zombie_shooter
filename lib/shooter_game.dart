@@ -13,6 +13,7 @@ import 'package:flame/sprite.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flame/input.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter_zombie_shooter/enemy.dart';
 import 'package:flutter_zombie_shooter/enums_and_constants/actions.dart';
 import 'package:flutter_zombie_shooter/enums_and_constants/constants.dart';
@@ -115,7 +116,7 @@ class ShooterGame extends FlameGame
       ..priority = 1);
 
     await add(torch..priority = 2);
-    await add(LootBox()
+    await add(LootBox(LootBoxNumber: 0)
       ..position = Vector2.all(800)
       ..priority = 2);
 
@@ -146,6 +147,7 @@ class ShooterGame extends FlameGame
   bool loading = false;
   onDirectionChanged(Direction direction) {
     if (Vector2(direction.rightX, direction.rightY).length > 0.8 &&
+        !_player.dead &&
         _player.weapon != Weapon.knife &&
         _player.weapon != Weapon.flashlight) {
       if (magazine.value[_player.weapon]! > 0) {
@@ -184,10 +186,14 @@ class ShooterGame extends FlameGame
     }
 
     torch.position = _player.position;
-    _player.direction = direction;
+    _player.direction = _player.dead
+        ? Direction(leftX: 0, rightX: 0, leftY: 0, rightY: 0)
+        : direction;
   }
 
   FutureOr<void> EndGame() {
+    camera.shake(duration: kBlackoutTimeDelay, intensity: 3);
+
     _blackoutScreen.add(OpacityEffect.by(
       1,
       EffectController(duration: kBlackoutTimeDelay),

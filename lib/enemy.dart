@@ -235,6 +235,7 @@ class Zombie extends SpriteAnimationComponent
       speed = kZombieSpeed * 0;
       if (i == 30) {
         gameRef.hp.value -= 1;
+        //gameRef.camera.shake(duration: 0.1, intensity: 1);
         //print(player.HP);
         i = 0;
       }
