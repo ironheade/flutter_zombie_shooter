@@ -6,8 +6,12 @@ import 'package:flame/components.dart';
 import 'package:flame/palette.dart';
 import 'package:flutter_zombie_shooter/enemy.dart';
 import 'package:flutter_zombie_shooter/player.dart';
+import 'package:flutter_zombie_shooter/shooter_game.dart';
 
-class EnemyManager extends Component with CollisionCallbacks {
+import '../enums_and_constants/constants.dart';
+
+class EnemyManager extends Component
+    with CollisionCallbacks, HasGameRef<ShooterGame> {
   late Timer _timer;
   late Player player;
 
@@ -40,5 +44,12 @@ class EnemyManager extends Component with CollisionCallbacks {
   void update(double dt) {
     super.update(dt);
     _timer.update(dt);
+    if (gameRef.hp.value < 1) {
+      _timer.stop();
+      Future.delayed(
+          Duration(milliseconds: (kBlackoutTimeDelay * 1000).toInt()), () {
+        removeFromParent();
+      });
+    }
   }
 }

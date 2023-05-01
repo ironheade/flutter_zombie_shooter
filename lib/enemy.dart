@@ -5,6 +5,7 @@ import 'package:flame/components.dart';
 import 'package:flame/particles.dart';
 import 'package:flame/rendering.dart';
 import 'package:flame/sprite.dart';
+import 'package:flame/src/game/notifying_vector2.dart';
 import 'package:flutter/animation.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -74,6 +75,7 @@ class Zombie extends SpriteAnimationComponent
   @override
   Future<void> onLoad() async {
     super.onLoad();
+    //debugMode = true;
     decorator.addLast(PaintDecorator.tint(Color.fromARGB(170, 2, 0, 0)));
     for (var bloodSplashColor in bloodSpasheTypes) {
       bloodSpritesWithColor.add(
@@ -83,6 +85,7 @@ class Zombie extends SpriteAnimationComponent
         ],
       );
     }
+    /*
     add(ParticleSystemComponent(
         particle: Particle.generate(
             count: 10,
@@ -99,8 +102,9 @@ class Zombie extends SpriteAnimationComponent
                 ),
               );
             })));
+            */
 
-    add(RectangleHitbox()
+    add(CircleHitbox()
       ..collisionType = CollisionType.passive
       ..isSolid = true);
     await _loadAnimations().then(
@@ -135,19 +139,21 @@ class Zombie extends SpriteAnimationComponent
     }
   }
 
-  void Bleed() {
+  void Bleed(double angle, Set<Vector2> intersectionPoints) {
     add(ParticleSystemComponent(
         particle: Particle.generate(
-            count: 10,
+            count: 100,
             lifespan: 1,
             generator: (i) {
               return MovingParticle(
-                from: Vector2.all(0),
-                to: Vector2(Random().nextInt(40).toDouble(),
-                    Random().nextInt(40).toDouble()),
+                from: (size / 2),
+                to: //Vector2(Random().nextInt(20).toDouble(),                    Random().nextInt(20).toDouble()),
+                    // Vector2(size.x / 2 + cos(angle) * 40,                        size.y / 2 + sin(angle) * 40),
+
+                    Vector2(sin(angle), cos(angle)) * 40,
                 child: CircleParticle(
                   radius: 2.0,
-                  paint: Paint()..color = Color.fromARGB(255, 131, 18, 18),
+                  paint: Paint()..color = Color.fromARGB(255, 18, 131, 22),
                 ),
               );
             })));
@@ -158,7 +164,7 @@ class Zombie extends SpriteAnimationComponent
     super.onCollision(intersectionPoints, other);
     if (other.runtimeType == Bullet) {
       showBeingHit();
-      //Bleed();
+      //Bleed(other.angle, intersectionPoints);
 
       parent!.add(Blood(
           bloodPosition:
@@ -219,6 +225,7 @@ class Zombie extends SpriteAnimationComponent
 
     angle = thetaRadians;
     onCollidable ? null : movementVector = (player.position - position);
+
     Vector2 distanceVector = (player.position - position);
 
     if (distanceVector.length < 120) {
@@ -244,10 +251,5 @@ class Zombie extends SpriteAnimationComponent
     if (movementVector.length > 100) {
       position += movementVector / movementVector.length * speed * dt;
     }
-    /*
-    if (position.x > 1650) {
-      removeFromParent();
-    }
-    */
   }
 }

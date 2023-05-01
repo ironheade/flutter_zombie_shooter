@@ -1,13 +1,16 @@
 import 'dart:async';
+import 'dart:ffi';
 import 'dart:io';
 import 'dart:math';
 
 import 'package:flame/collisions.dart';
 import 'package:flame/components.dart';
+import 'package:flame/effects.dart';
 import 'package:flame/game.dart';
 import 'package:flame/rendering.dart';
 
 import 'package:flame/sprite.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flame/input.dart';
 import 'package:flutter_zombie_shooter/enemy.dart';
@@ -20,6 +23,7 @@ import 'package:flutter_zombie_shooter/helpers/enemy_manager.dart';
 import 'package:flutter_zombie_shooter/helpers/bullet.dart';
 import 'package:flutter_zombie_shooter/enums_and_constants/directions.dart';
 import 'package:flutter_zombie_shooter/enums_and_constants/weapons.dart';
+import 'package:flutter_zombie_shooter/helpers/lootBox.dart';
 import 'package:flutter_zombie_shooter/helpers/playerLight.dart';
 import 'package:flutter_zombie_shooter/helpers/streetLamp.dart';
 
@@ -28,9 +32,20 @@ import 'package:flutter_zombie_shooter/player.dart';
 import 'package:flutter_zombie_shooter/world.dart';
 
 class ShooterGame extends FlameGame
-    with PanDetector, TapDetector, HasCollisionDetection, HasDecorator {
+    with
+        PanDetector,
+        TapDetector,
+        HasCollisionDetection,
+        HasDecorator,
+        HasGameRef<ShooterGame> {
   final World _world = World();
   final Car _car = Car();
+
+  final RectangleComponent _blackoutScreen = RectangleComponent(
+    paint: Paint()..color = Color.fromARGB(0, 0, 0, 0),
+  );
+
+  late Weapon currentWeapon;
   ValueNotifier<Map<Weapon, int>> magazine = ValueNotifier<Map<Weapon, int>>({
     Weapon.handgun: magazineCapacity[Weapon.handgun] ?? 10,
     Weapon.rifle: magazineCapacity[Weapon.rifle] ?? 10,
@@ -45,9 +60,6 @@ class ShooterGame extends FlameGame
 
   ValueNotifier<int> kills = ValueNotifier<int>(0);
   ValueNotifier<int> hp = ValueNotifier<int>(kPlayerHealthPoints);
-  ValueNotifier<String> ammo = ValueNotifier<String>("0/0");
-
-  //ValueNotifier<bool> isPaused = ValueNotifier<bool>(false);
 
   final Player _player = Player();
   late PlayerLight torch = PlayerLight(
@@ -68,10 +80,12 @@ class ShooterGame extends FlameGame
           columns: 1,
           rows: 1);
     }
-    ammo.value =
-        ("${ammunition.value[_player.weapon]}/${magazine.value[_player.weapon]}");
+    currentWeapon = _player.weapon;
+
     overlays.add("Dashboard");
+
     await add(_world);
+
     await add(_car..priority = 3);
     await add(_player);
     await add(_treeManager..priority = 4);
@@ -101,11 +115,24 @@ class ShooterGame extends FlameGame
       ..priority = 1);
 
     await add(torch..priority = 2);
-    //await add(EnemyManager(player: _player)..priority = 2);
+    await add(LootBox()
+      ..position = Vector2.all(800)
+      ..priority = 2);
+
+    await add(EnemyManager(player: _player)..priority = 2);
+    //await add(Zombie(player: _player)      ..position = Vector2.all(700)      ..priority = 2);
 
     for (var streetLampPosition in streetLampPositions) {
       add(StreetLamp(streetLampPosition: streetLampPosition));
     }
+
+    await add(
+      _blackoutScreen
+        ..priority = 5
+        ..position = _world.position
+        ..size = _world.size,
+    );
+
     _car.position = _world.size / 1.6;
     _player.position = _world.size / 2;
     torch.position = _player.position;
@@ -135,9 +162,6 @@ class ShooterGame extends FlameGame
             isFiring = false;
           });
         }
-
-        ammo.value =
-            ("${ammunition.value[_player.weapon]}/${magazine.value[_player.weapon]}");
       } else {
         if (ammunition.value[_player.weapon]! > 0) {
           _player.playerAction = PlayerAction.reload;
@@ -151,15 +175,48 @@ class ShooterGame extends FlameGame
           Future.delayed(
               Duration(milliseconds: weaponReloadMS[_player.weapon]!), () {
             magazine.value[_player.weapon] = magazineCapacity[_player.weapon]!;
-            ammo.value =
-                ("${ammunition.value[_player.weapon]}/${magazine.value[_player.weapon]}");
+            magazine.notifyListeners();
           });
+
+          ammunition.notifyListeners();
         }
       }
     }
 
     torch.position = _player.position;
     _player.direction = direction;
+  }
+
+  FutureOr<void> EndGame() {
+    _blackoutScreen.add(OpacityEffect.by(
+      1,
+      EffectController(duration: kBlackoutTimeDelay),
+    ));
+  }
+
+  FutureOr<void> ResetGame() {
+    _blackoutScreen.add(OpacityEffect.by(
+      -1,
+      EffectController(duration: 1.75),
+    ));
+    hp.value = 100;
+    kills.value = 0;
+    _player.position = _world.size / 2;
+    torch.position = _player.position;
+    _player.dead = false;
+    _player.weapon = Weapon.handgun;
+    ammunition.value = {
+      Weapon.handgun: ammunitionCapacity[Weapon.handgun] ?? 10,
+      Weapon.rifle: ammunitionCapacity[Weapon.rifle] ?? 10,
+      Weapon.shotgun: ammunitionCapacity[Weapon.shotgun] ?? 10
+    };
+    magazine.value = {
+      Weapon.handgun: magazineCapacity[Weapon.handgun] ?? 10,
+      Weapon.rifle: magazineCapacity[Weapon.rifle] ?? 10,
+      Weapon.shotgun: magazineCapacity[Weapon.shotgun] ?? 10
+    };
+
+    add(EnemyManager(player: _player)..priority = 2);
   }
 
   FutureOr<void> fireBullet() {
@@ -178,7 +235,9 @@ class ShooterGame extends FlameGame
   }
 
   onWeaponChanged(Weapon weapon) {
+    currentWeapon = weapon;
     _player.weapon = weapon;
-    ammo.value = ("${ammunition.value[weapon]}/${magazine.value[weapon]}");
+    magazine.notifyListeners();
+    ammunition.notifyListeners();
   }
 }

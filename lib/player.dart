@@ -27,7 +27,7 @@ import 'package:flutter_zombie_shooter/world.dart';
 import 'enums_and_constants/constants.dart';
 
 class Player extends SpriteAnimationComponent
-    with CollisionCallbacks, HasGameRef {
+    with CollisionCallbacks, HasGameRef<ShooterGame> {
   Player()
       : super(
           size: Vector2.all(kPlayerSize),
@@ -37,6 +37,7 @@ class Player extends SpriteAnimationComponent
   Direction direction = Direction(leftX: 0, leftY: 0, rightX: 0, rightY: 0);
   bool onCollidable = false;
   //int HP = kPlayerHealthPoints;
+  bool dead = false;
   int kills = 0;
   Weapon weapon = Weapon.handgun;
   PlayerAction playerAction = PlayerAction.wait;
@@ -132,6 +133,11 @@ class Player extends SpriteAnimationComponent
             */
     super.update(dt);
     updatePosition(dt);
+    if (gameRef.hp.value < 1 && !dead) {
+      dead = true;
+      //removeFromParent();
+      gameRef.EndGame();
+    }
   }
 
   updatePosition(double dt) {

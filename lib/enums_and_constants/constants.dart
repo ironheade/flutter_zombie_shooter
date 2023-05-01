@@ -1,3 +1,6 @@
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
+
 double kControllerPaddingAsScreenWidthPercentage = 0.1;
 double kControllerPaddingAsScreenHeightPercentage = 0.1;
 
@@ -15,3 +18,8 @@ double kZombieSize = 100;
 double kZombieAnimationSpeed = 0.05;
 double kZombieSpeed = 25;
 int kZombieHealthpoints = 100;
+
+double kBlackoutTimeDelay = 4.75;
+
+TextStyle kDashBoardFont =
+    TextStyle(fontSize: 25, color: Colors.yellow.shade700);
