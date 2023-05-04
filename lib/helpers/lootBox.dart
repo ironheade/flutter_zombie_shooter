@@ -11,6 +11,7 @@ import 'package:flutter_zombie_shooter/shooter_game.dart';
 class LootBox extends SpriteComponent
     with CollisionCallbacks, HasGameRef<ShooterGame> {
   late int LootBoxNumber;
+  late Weapon lootBoxWeapon;
   LootBox({required this.LootBoxNumber})
       : super(
             //size: Vector2(50, 40),
@@ -20,6 +21,8 @@ class LootBox extends SpriteComponent
 
   @override
   Future<void> onLoad() async {
+    lootBoxWeapon = bulletSize.keys.elementAt(LootBoxNumber);
+
     //sprite = await Sprite.load('lootBoxSprites.png');
     SpriteSheet mySprite = SpriteSheet.fromColumnsAndRows(
         image: //await composition.compose(),
@@ -33,11 +36,11 @@ class LootBox extends SpriteComponent
 
     add(
       TextComponent(
-          text: '+50',
+          text: '+${lootBoxAdd[lootBoxWeapon]}',
           //\nAK-47
 
           textRenderer: TextPaint(
-            style: TextStyle(color: Color.fromARGB(255, 255, 255, 255)),
+            style: TextStyle(color: Color.fromARGB(255, 254, 236, 175)),
           ),
           anchor: Anchor.topLeft,
           position: Vector2.all(5),
@@ -51,8 +54,8 @@ class LootBox extends SpriteComponent
       removeFromParent();
       gameRef.ammunition.notifyListeners();
       gameRef.magazine.notifyListeners();
-      gameRef.ammunition.value[Weapon.rifle] =
-          gameRef.ammunition.value[Weapon.rifle]! + 50;
+      gameRef.ammunition.value[lootBoxWeapon] =
+          gameRef.ammunition.value[lootBoxWeapon]! + lootBoxAdd[lootBoxWeapon]!;
     }
     if (other.runtimeType == Car) {
       removeFromParent();

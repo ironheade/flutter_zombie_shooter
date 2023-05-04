@@ -40,6 +40,8 @@ dependencies:
   flutter_joystick: ^0.0.3
   vector_math: ^2.1.2
   flame_tiled: ^1.9.1
+  flutter_native_splash: ^2.2.16
+
 
 dev_dependencies:
   flutter_test:

@@ -25,6 +25,7 @@ import 'package:flutter_zombie_shooter/helpers/bullet.dart';
 import 'package:flutter_zombie_shooter/enums_and_constants/directions.dart';
 import 'package:flutter_zombie_shooter/enums_and_constants/weapons.dart';
 import 'package:flutter_zombie_shooter/helpers/lootBox.dart';
+import 'package:flutter_zombie_shooter/helpers/lootBoxManager.dart';
 import 'package:flutter_zombie_shooter/helpers/playerLight.dart';
 import 'package:flutter_zombie_shooter/helpers/streetLamp.dart';
 
@@ -90,6 +91,8 @@ class ShooterGame extends FlameGame
     await add(_car..priority = 3);
     await add(_player);
     await add(_treeManager..priority = 4);
+    await add(
+        lootBoxManager(player: _player, worldSize: _world.size)..priority = 2);
 
 //head and tail lights of the car
     await add(PlayerLight(
@@ -116,9 +119,6 @@ class ShooterGame extends FlameGame
       ..priority = 1);
 
     await add(torch..priority = 2);
-    await add(LootBox(LootBoxNumber: 0)
-      ..position = Vector2.all(800)
-      ..priority = 2);
 
     await add(EnemyManager(player: _player)..priority = 2);
     //await add(Zombie(player: _player)      ..position = Vector2.all(700)      ..priority = 2);
@@ -223,6 +223,7 @@ class ShooterGame extends FlameGame
     };
 
     add(EnemyManager(player: _player)..priority = 2);
+    add(lootBoxManager(player: _player, worldSize: _world.size)..priority = 2);
   }
 
   FutureOr<void> fireBullet() {

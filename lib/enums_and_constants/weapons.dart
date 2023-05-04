@@ -58,7 +58,13 @@ Map<Weapon, Map<Offsets, num>> bulletOffset = {
 };
 
 Map<Weapon, Vector2> bulletSize = {
-  Weapon.handgun: Vector2(10, 5),
   Weapon.rifle: Vector2(10, 5),
   Weapon.shotgun: Vector2(10, 5),
+  Weapon.handgun: Vector2(10, 5),
+};
+
+Map<Weapon, int> lootBoxAdd = {
+  Weapon.rifle: 50,
+  Weapon.shotgun: 5,
+  Weapon.handgun: 20,
 };
