@@ -102,11 +102,9 @@ class _DashboardState extends State<Dashboard> {
             Column(children: [
               IconButton(
                 onPressed: () {
-                  widget.game.hp.value < 1
-                      ? widget.game.ResetGame()
-                      : setState(() {
-                          widget.game.paused = !widget.game.paused;
-                        });
+                  setState(() {
+                    widget.game.paused = !widget.game.paused;
+                  });
                 },
                 icon: Icon(widget.game.paused ? Icons.play_arrow : Icons.pause),
                 color: Colors.yellow.shade700,

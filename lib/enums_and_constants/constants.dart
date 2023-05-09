@@ -23,3 +23,13 @@ double kBlackoutTimeDelay = 4.75;
 
 TextStyle kDashBoardFont =
     TextStyle(fontSize: 25, color: Colors.yellow.shade700);
+
+TextStyle kMainMenuButtonText = TextStyle(color: Colors.black, fontSize: 32);
+
+ButtonStyle kMainMenuButton = ElevatedButton.styleFrom(
+    foregroundColor: Colors.white,
+    backgroundColor: Colors.yellow,
+    shadowColor: Colors.yellowAccent,
+    elevation: 3,
+    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(50.0)),
+    minimumSize: Size(200, 10));
