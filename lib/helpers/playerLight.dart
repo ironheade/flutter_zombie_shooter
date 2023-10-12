@@ -2,14 +2,17 @@ import 'dart:math';
 
 import 'package:flame/collisions.dart';
 import 'package:flame/components.dart';
+import 'package:flame/game.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_zombie_shooter/helpers/bullet.dart';
 import 'package:flutter_zombie_shooter/helpers/car.dart';
 import 'package:flutter_zombie_shooter/helpers/streetLamp.dart';
 import 'package:flutter_zombie_shooter/player.dart';
+import 'package:flutter_zombie_shooter/shooter_game.dart';
 
-class PlayerLight extends CircleComponent with CollisionCallbacks {
+class PlayerLight extends CircleComponent
+    with CollisionCallbacks, HasGameRef<ShooterGame> {
   late Vector2 lightPosition;
   late double lightRadius;
   late bool playerTorch;
@@ -56,6 +59,12 @@ class PlayerLight extends CircleComponent with CollisionCallbacks {
         ? !runtimeTypesWithPlayer.contains(other.runtimeType)
         : !runtimeTypesWithoutPlayer.contains(other.runtimeType)) {
       objectsInLight[other.hashCode] = other.position;
+      if (other.runtimeType != Bullet) {
+        print(other.width);
+        print(other.height);
+        print(other.angle);
+        print(other.position);
+      }
     }
   }
 
@@ -66,6 +75,12 @@ class PlayerLight extends CircleComponent with CollisionCallbacks {
         : !runtimeTypesWithoutPlayer.contains(other.runtimeType)) {
       objectsInLight.remove(other.hashCode);
     }
+  }
+
+  @override
+  void update(double dt) {
+    super.update(dt);
+    final origin = Vector2(200, 200);
   }
 
   @override

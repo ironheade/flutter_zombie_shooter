@@ -35,10 +35,12 @@ class Player extends SpriteAnimationComponent
 
   final double _animationSpeed = kPlayerAnimationSpeed;
   Direction direction = Direction(leftX: 0, leftY: 0, rightX: 0, rightY: 0);
-  bool onCollidable = false;
+
   //int HP = kPlayerHealthPoints;
   bool dead = false;
   int kills = 0;
+  double offsetX = 0.4;
+  double offsetY = 0.6;
   Weapon weapon = Weapon.handgun;
   PlayerAction playerAction = PlayerAction.wait;
   late Map animations;
@@ -55,11 +57,14 @@ class Player extends SpriteAnimationComponent
   Future<void> onLoad() async {
     super.onLoad();
     //debugMode = true;
-    add(CircleHitbox(isSolid: true)..position = Vector2(0.4, 0.6));
+    add(CircleHitbox(isSolid: true)
+      ..position = Vector2(
+          offsetX * size.x - size.x / 2, offsetY * size.x - size.x / 2));
     await _loadAnimations().then(
       (_) => {
         animation = animations[weapon][playerAction],
-        anchor = const Anchor(0.4, 0.6), //top left clockwise: 0,0;1,0;1,1;0,1
+
+        anchor = Anchor(offsetX, offsetY), //top left clockwise: 0,0;1,0;1,1;0,1
       },
     );
   }
@@ -67,47 +72,12 @@ class Player extends SpriteAnimationComponent
   @override
   void onCollision(Set<Vector2> intersectionPoints, PositionComponent other) {
     if (collisionRuntimetypes.contains(other.runtimeType)) {
-      Vector2 vectorTowardsBox =
-          (intersectionPoints.first + intersectionPoints.last) / 2 - position;
-      Vector2 movementVector = Vector2(direction.leftX, direction.leftY);
-      double vectorAngle =
-          AngleBetweenVectors(vectorTowardsBox, movementVector);
-
-      if (vectorAngle < pi / 2) {
-        onCollidable = true;
-      }
-      if (onCollidable) {
-        //Projection of the movement Vector to the resulting vector of both intersection points
-        Vector2 directionVector = Vector2(direction.leftX, direction.leftY);
-        Vector2 projectionVector =
-            intersectionPoints.first - intersectionPoints.last;
-
-        Vector2 newDirectionVector =
-            projectVector(directionVector, projectionVector);
-
-        position += newDirectionVector;
-
-        //angle between the actual movement vector and the vector between player center and middle of intersection points
-
-        if (vectorAngle > pi / 2) {
-          onCollidable = false;
-        }
-      }
-    }
-  }
-
-  @override
-  void onCollisionStart(
-      Set<Vector2> intersectionPoints, PositionComponent other) {
-    if (collisionRuntimetypes.contains(other.runtimeType)) {
-      onCollidable = true;
-    }
-  }
-
-  @override
-  void onCollisionEnd(PositionComponent other) {
-    if (collisionRuntimetypes.contains(other.runtimeType)) {
-      onCollidable = false;
+      Vector2 middlePoint =
+          (intersectionPoints.first + intersectionPoints.last) / 2;
+      double resetVectorLength = size.x / 2 - position.distanceTo(middlePoint);
+      Vector2 resetVectorDirection = (position - middlePoint).normalized();
+      Vector2 resetVector = resetVectorDirection * resetVectorLength;
+      position = position + resetVector;
     }
   }
 
@@ -141,10 +111,8 @@ class Player extends SpriteAnimationComponent
   }
 
   updatePosition(double dt) {
-    if (!onCollidable) {
-      position +=
-          Vector2(direction.leftX, direction.leftY) * (1 + kPlayerSpeedFactor);
-    }
+    position +=
+        Vector2(direction.leftX, direction.leftY) * (1 + kPlayerSpeedFactor);
 
     if (playerAction == PlayerAction.reload) {
       Future.delayed(Duration(milliseconds: weaponReloadMS[weapon]!), () {

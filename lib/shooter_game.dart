@@ -46,6 +46,8 @@ class ShooterGame extends FlameGame
   final RectangleComponent _blackoutScreen = RectangleComponent(
     paint: Paint()..color = Color.fromARGB(0, 0, 0, 0),
   );
+  Paint paintRay = Paint()..color = Colors.red.withOpacity(0.6);
+  RaycastResult<ShapeHitbox>? result;
 
   late Weapon currentWeapon;
   ValueNotifier<Map<Weapon, int>> magazine = ValueNotifier<Map<Weapon, int>>({
@@ -85,7 +87,6 @@ class ShooterGame extends FlameGame
     currentWeapon = _player.weapon;
 
     overlays.add("Dashboard");
-
     await add(_world);
 
     await add(_car..priority = 3);
@@ -141,6 +142,32 @@ class ShooterGame extends FlameGame
 
     camera.followComponent(_player,
         worldBounds: Rect.fromLTRB(0, 0, _world.size.x, _world.size.y));
+  }
+
+  @override
+  void update(double dt) {
+    // TODO: implement update
+    super.update(dt);
+    final origin = Vector2(200, 200);
+    final result = collisionDetection.raycastAll(
+      origin,
+      numberOfRays: 100,
+    );
+  }
+
+  @override
+  void render(Canvas canvas) {
+    super.render(canvas);
+    if (result != null && result!.isActive) {
+      final originOffset = Vector2(200, 200).toOffset();
+      final intersectionPoint = result!.intersectionPoint!.toOffset();
+      canvas.drawLine(
+        originOffset,
+        intersectionPoint,
+        paintRay,
+      );
+      canvas.drawCircle(originOffset, 10, paintRay);
+    }
   }
 
   bool isFiring = false;

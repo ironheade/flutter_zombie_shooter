@@ -22,7 +22,7 @@ class LootBox extends SpriteComponent
   @override
   Future<void> onLoad() async {
     lootBoxWeapon = bulletSize.keys.elementAt(LootBoxNumber);
-
+    //debugMode = true;
     //sprite = await Sprite.load('lootBoxSprites.png');
     SpriteSheet mySprite = SpriteSheet.fromColumnsAndRows(
         image: //await composition.compose(),
