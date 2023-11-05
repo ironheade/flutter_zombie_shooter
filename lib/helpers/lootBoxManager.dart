@@ -38,7 +38,7 @@ class lootBoxManager extends Component with HasGameRef<ShooterGame> {
 
     Future.delayed(Duration(seconds: spawnTime), () {
       add(LootBox(LootBoxNumber: LootBoxNumber)..position = position);
-      print("loot box added");
+
       _spawnLootBox();
     });
   }

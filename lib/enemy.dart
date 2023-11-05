@@ -127,15 +127,15 @@ class Zombie extends SpriteAnimationComponent
   void onCollisionStart(
       Set<Vector2> intersectionPoints, PositionComponent other) {
     if (other.runtimeType == Car) {
-      movementVector = Vector2.all(0);
-      onCollidable = true;
+      //movementVector = Vector2.all(0);
+      //onCollidable = true;
     }
   }
 
   @override
   void onCollisionEnd(PositionComponent other) {
     if (other.runtimeType == Car) {
-      onCollidable = false;
+      //onCollidable = false;
     }
   }
 
@@ -182,7 +182,15 @@ class Zombie extends SpriteAnimationComponent
         gameRef.kills.value += 1;
       }
     }
-
+    /*
+    if (other.runtimeType == Car) {
+      position = position +
+          getResetVector(
+              intersectionPoints: intersectionPoints,
+              position: position,
+              size: size);
+    }
+    */
     if (other.runtimeType == Car) {
       Vector2 vectorTowardsBox =
           (intersectionPoints.first + intersectionPoints.last) / 2 - position;

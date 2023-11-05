@@ -18,14 +18,17 @@ import 'package:flutter_zombie_shooter/enemy.dart';
 import 'package:flutter_zombie_shooter/enums_and_constants/actions.dart';
 import 'package:flutter_zombie_shooter/enums_and_constants/constants.dart';
 import 'package:flutter_zombie_shooter/enums_and_constants/mapComponents.dart';
+import 'package:flutter_zombie_shooter/enums_and_constants/maps.dart';
 import 'package:flutter_zombie_shooter/helpers/car.dart';
 
 import 'package:flutter_zombie_shooter/helpers/enemy_manager.dart';
 import 'package:flutter_zombie_shooter/helpers/bullet.dart';
 import 'package:flutter_zombie_shooter/enums_and_constants/directions.dart';
 import 'package:flutter_zombie_shooter/enums_and_constants/weapons.dart';
+import 'package:flutter_zombie_shooter/helpers/lightSource.dart';
 import 'package:flutter_zombie_shooter/helpers/lootBox.dart';
 import 'package:flutter_zombie_shooter/helpers/lootBoxManager.dart';
+import 'package:flutter_zombie_shooter/helpers/object.dart';
 import 'package:flutter_zombie_shooter/helpers/playerLight.dart';
 import 'package:flutter_zombie_shooter/helpers/streetLamp.dart';
 
@@ -40,8 +43,9 @@ class ShooterGame extends FlameGame
         HasCollisionDetection,
         HasDecorator,
         HasGameRef<ShooterGame> {
-  final World _world = World();
+  final World _world = World(map: maps[2]);
   final Car _car = Car();
+  final MyObject _object = MyObject();
 
   final RectangleComponent _blackoutScreen = RectangleComponent(
     paint: Paint()..color = Color.fromARGB(0, 0, 0, 0),
@@ -78,6 +82,8 @@ class ShooterGame extends FlameGame
 
   @override
   Future<void> onLoad() async {
+    final paint = Paint()
+      ..color = Color.fromARGB(255, 105, 90, 89).withOpacity(1);
     for (Weapon weapon in weaponBulletSprites.keys) {
       bulletSpriteSheets[weapon] = SpriteSheet.fromColumnsAndRows(
           image: await images.load(weaponBulletSprites[weapon]!),
@@ -88,45 +94,103 @@ class ShooterGame extends FlameGame
 
     overlays.add("Dashboard");
     await add(_world);
-
-    await add(_car..priority = 3);
+    //await add(_car..priority = 3);
     await add(_player);
     await add(_treeManager..priority = 4);
     await add(
         lootBoxManager(player: _player, worldSize: _world.size)..priority = 2);
+    /*await add(LightSource(
+        lightRadius: 200,
+        playerPosition: _player.position,
+        primaryLighColour: Color.fromARGB(255, 206, 107, 107)));*/
+    await add(torch);
+    //await add(torch..priority = 2);
+    //await add(_lightSource..priority = 2);
 
-//head and tail lights of the car
-    await add(PlayerLight(
-        lightRadius: 70,
-        lightPosition:
-            Vector2(_world.size.x / 1.6 + 120, _world.size.y / 1.6 - 70))
-      ..priority = 1);
-    await add(PlayerLight(
-        lightRadius: 70,
-        lightPosition:
-            Vector2(_world.size.x / 1.6 + 75, _world.size.y / 1.6 - 120))
-      ..priority = 1);
-    await add(PlayerLight(
-        lightRadius: 50,
-        primaryLighColour: Color.fromARGB(172, 192, 8, 8),
-        lightPosition:
-            Vector2(_world.size.x / 1.6 - 125, _world.size.y / 1.6 + 80))
-      ..priority = 1);
-    await add(PlayerLight(
-        lightRadius: 50,
-        primaryLighColour: Color.fromARGB(172, 192, 8, 8),
-        lightPosition:
-            Vector2(_world.size.x / 1.6 - 65, _world.size.y / 1.6 + 135))
-      ..priority = 1);
-
-    await add(torch..priority = 2);
-
-    await add(EnemyManager(player: _player)..priority = 2);
+    //await add(EnemyManager(player: _player)..priority = 2);
+    //await add(_object);
     //await add(Zombie(player: _player)      ..position = Vector2.all(700)      ..priority = 2);
-
-    for (var streetLampPosition in streetLampPositions) {
-      add(StreetLamp(streetLampPosition: streetLampPosition));
+    for (var component in _world.map.additionalComponents) {
+      add(component);
     }
+    await add(CircleComponent(
+        radius: 20,
+        anchor: Anchor.center,
+        position: Vector2(500, 500),
+        paint: paint,
+        children: [CircleHitbox()]));
+
+    await add(CircleComponent(
+        radius: 30,
+        anchor: Anchor.center,
+        position: Vector2(500, 600),
+        paint: paint,
+        children: [CircleHitbox()]));
+
+    await add(CircleComponent(
+        radius: 30,
+        anchor: Anchor.center,
+        position: Vector2(300, 600),
+        paint: paint,
+        children: [CircleHitbox()]));
+
+    await add(CircleComponent(
+        radius: 40,
+        anchor: Anchor.center,
+        position: Vector2(400, 700),
+        paint: paint,
+        children: [CircleHitbox()]));
+
+    await add(CircleComponent(
+        radius: 5,
+        anchor: Anchor.center,
+        position: Vector2(300, 700),
+        paint: paint,
+        children: [CircleHitbox()]));
+    await add(CircleComponent(
+        radius: 5,
+        anchor: Anchor.center,
+        position: Vector2(280, 700),
+        paint: paint,
+        children: [CircleHitbox()]));
+
+    await add(CircleComponent(
+        radius: 5,
+        anchor: Anchor.center,
+        position: Vector2(260, 710),
+        paint: paint,
+        children: [CircleHitbox()]));
+
+    await add(RectangleComponent(
+        position: Vector2(300, 800),
+        size: Vector2.all(40),
+        paint: paint,
+        children: [RectangleHitbox()]));
+
+    await add(RectangleComponent(
+        position: Vector2(300, 900),
+        size: Vector2(80, 10),
+        paint: paint,
+        angle: pi / 6,
+        children: [RectangleHitbox()]));
+    await add(RectangleComponent(
+        position: Vector2(500, 750),
+        size: Vector2(40, 60),
+        paint: paint,
+        children: [RectangleHitbox()]));
+    await add(RectangleComponent(
+        position: Vector2(520, 780),
+        size: Vector2.all(40),
+        paint: paint,
+        children: [RectangleHitbox()]));
+
+    await add(RectangleComponent(
+        position: Vector2(920, 580),
+        size: Vector2.all(40),
+        paint: paint,
+        children: [RectangleHitbox()]));
+
+    //for (var streetLampPosition in streetLampPositions) {      add(StreetLamp(streetLampPosition: streetLampPosition));    }
 
     await add(
       _blackoutScreen
@@ -135,39 +199,14 @@ class ShooterGame extends FlameGame
         ..size = _world.size,
     );
 
-    _car.position = _world.size / 1.6;
+    //_car.position = _world.size / 1.6;
     _player.position = _world.size / 2;
     torch.position = _player.position;
+    //_lightSource.position = _player.position;
     _player.priority = 3;
 
     camera.followComponent(_player,
         worldBounds: Rect.fromLTRB(0, 0, _world.size.x, _world.size.y));
-  }
-
-  @override
-  void update(double dt) {
-    // TODO: implement update
-    super.update(dt);
-    final origin = Vector2(200, 200);
-    final result = collisionDetection.raycastAll(
-      origin,
-      numberOfRays: 100,
-    );
-  }
-
-  @override
-  void render(Canvas canvas) {
-    super.render(canvas);
-    if (result != null && result!.isActive) {
-      final originOffset = Vector2(200, 200).toOffset();
-      final intersectionPoint = result!.intersectionPoint!.toOffset();
-      canvas.drawLine(
-        originOffset,
-        intersectionPoint,
-        paintRay,
-      );
-      canvas.drawCircle(originOffset, 10, paintRay);
-    }
   }
 
   bool isFiring = false;
@@ -213,6 +252,7 @@ class ShooterGame extends FlameGame
     }
 
     torch.position = _player.position;
+
     _player.direction = _player.dead
         ? Direction(leftX: 0, rightX: 0, leftY: 0, rightY: 0)
         : direction;

@@ -17,7 +17,7 @@ class Bullet extends SpriteComponent with HasGameRef, CollisionCallbacks {
   double directionAngle;
   List collisionRuntimetypes = [World, Zombie, StreetLamp];
   NotifyingVector2 worldSize;
-
+  late ShapeHitbox bulletHitbox = RectangleHitbox();
   late SpriteSheet spriteSheet;
 
   late Player player;
@@ -56,7 +56,7 @@ class Bullet extends SpriteComponent with HasGameRef, CollisionCallbacks {
   @override
   Future<void> onLoad() async {
     // _LoadAinmations().then((_) => {sprite = bulletSpriteSheets[weapon]});
-    add(RectangleHitbox());
+    add(bulletHitbox);
 
     add(PlayerLight(lightPosition: Vector2.all(1), lightRadius: 10)
       ..priority = 5);

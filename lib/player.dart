@@ -18,7 +18,10 @@ import 'package:flutter_zombie_shooter/enums_and_constants/directions.dart';
 import 'package:flutter_zombie_shooter/enums_and_constants/actions.dart';
 import 'package:flutter_zombie_shooter/enums_and_constants/weapons.dart';
 import 'package:flutter_zombie_shooter/functions/functions.dart';
+import 'package:flutter_zombie_shooter/helpers/bullet.dart';
 import 'package:flutter_zombie_shooter/helpers/car.dart';
+import 'package:flutter_zombie_shooter/helpers/lightSource.dart';
+import 'package:flutter_zombie_shooter/helpers/object.dart';
 import 'package:flutter_zombie_shooter/helpers/playerLight.dart';
 import 'package:flutter_zombie_shooter/helpers/streetLamp.dart';
 import 'package:flutter_zombie_shooter/shooter_game.dart';
@@ -35,6 +38,11 @@ class Player extends SpriteAnimationComponent
 
   final double _animationSpeed = kPlayerAnimationSpeed;
   Direction direction = Direction(leftX: 0, leftY: 0, rightX: 0, rightY: 0);
+  late LightSource _lightSource = LightSource(
+      numberOfRays: 20,
+      lightRadius: 300,
+      playerPosition: Vector2(300, 300),
+      primaryLighColour: Color.fromARGB(132, 248, 246, 206));
 
   //int HP = kPlayerHealthPoints;
   bool dead = false;
@@ -44,7 +52,8 @@ class Player extends SpriteAnimationComponent
   Weapon weapon = Weapon.handgun;
   PlayerAction playerAction = PlayerAction.wait;
   late Map animations;
-  List collisionRuntimetypes = [Car, StreetLamp, World];
+  List collisionRuntimetypes = [Car, StreetLamp, World, MyObject, ScreenHitbox];
+  ShapeHitbox playerHitbox = CircleHitbox(isSolid: true);
 
   double _speed = 300;
   Random _random = Random();
@@ -56,10 +65,24 @@ class Player extends SpriteAnimationComponent
   @override
   Future<void> onLoad() async {
     super.onLoad();
+    //parent!.add(        LightSource(lightRadius: 100, playerPosition: position)..priority = 5);
     //debugMode = true;
-    add(CircleHitbox(isSolid: true)
+/*
+    await add(CircleHitbox(isSolid: true)
       ..position = Vector2(
           offsetX * size.x - size.x / 2, offsetY * size.x - size.x / 2));
+          */
+    await add(playerHitbox
+      ..position = Vector2(
+          offsetX * size.x - size.x / 2, offsetY * size.x - size.x / 2));
+/*
+    await parent!.add(_lightSource
+      ..priority = 5
+      ..position = position
+      ..ignoreHitboxes = [playerHitbox]
+      ..primaryLighColour = Color.fromARGB(132, 248, 246, 206));
+*/
+    //await add(PlayerLight(lightPosition: position, lightRadius: 200));
     await _loadAnimations().then(
       (_) => {
         animation = animations[weapon][playerAction],
@@ -71,37 +94,39 @@ class Player extends SpriteAnimationComponent
 
   @override
   void onCollision(Set<Vector2> intersectionPoints, PositionComponent other) {
+    super.onCollision(intersectionPoints, other);
     if (collisionRuntimetypes.contains(other.runtimeType)) {
-      Vector2 middlePoint =
-          (intersectionPoints.first + intersectionPoints.last) / 2;
-      double resetVectorLength = size.x / 2 - position.distanceTo(middlePoint);
-      Vector2 resetVectorDirection = (position - middlePoint).normalized();
-      Vector2 resetVector = resetVectorDirection * resetVectorLength;
-      position = position + resetVector;
+      for (var resetVector in getResetVector(
+          direction: direction,
+          intersectionPoints: intersectionPoints,
+          position: position,
+          size: size)) {
+        position = position + resetVector;
+      }
     }
   }
 
   @override
   void update(double dt) {
-    /*
-    add(ParticleSystemComponent(
+    final particleComponent = ParticleSystemComponent(
         particle: Particle.generate(
-            count: 10,
-            lifespan: 1,
+            count: 20,
+            lifespan: 0.1,
             generator: (i) {
               return MovingParticle(
                 // Will move from corner to corner of the game canvas.
-                from: Vector2.all(40),
-                to: Vector2(Random().nextInt(20).toDouble(),
-                    Random().nextInt(20).toDouble()),
+                from: position,
+                to: position + (Vector2.random(Random())) * 90,
                 child: CircleParticle(
                   radius: 2.0,
-                  paint: Paint()..color = Color.fromARGB(255, 112, 0, 0),
+                  paint: Paint()..color = Color.fromARGB(255, 181, 7, 7),
                 ),
               );
-            })));
-            */
+            }));
+    //gameRef.add(particleComponent);
+
     super.update(dt);
+    _lightSource.position = position;
     updatePosition(dt);
     if (gameRef.hp.value < 1 && !dead) {
       dead = true;
