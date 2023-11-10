@@ -8,7 +8,7 @@ class SVGWorld extends SvgComponent with HasGameRef<ShooterGame> {
   late Vector2 mapSize;
   @override
   Future<void> onLoad() async {
-    final svgInstance = await Svg.load('background_svg.svg');
+    final svgInstance = await Svg.load('svg_object_layer.svg');
     mapSize = Vector2(svgInstance.svgRoot.viewport.viewBox.width,
         svgInstance.svgRoot.viewport.viewBox.height);
     //final size = Vector2.all(100);
@@ -21,6 +21,6 @@ class SVGWorld extends SvgComponent with HasGameRef<ShooterGame> {
     );
 
     add(svgComponent);
-    decorator.addLast(PaintDecorator.tint(Color.fromARGB(182, 0, 0, 0)));
+    //decorator.addLast(PaintDecorator.tint(Color.fromARGB(182, 0, 0, 0)));
   }
 }

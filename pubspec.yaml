@@ -73,7 +73,7 @@ flutter:
 
     - assets/images/
     - assets/transparent_svg_background.svg
-    - assets/background_svg.svg
+    - assets/svg_object_layer.svg
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware

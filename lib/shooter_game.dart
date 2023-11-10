@@ -10,6 +10,7 @@ import 'package:flame/game.dart';
 import 'package:flame/rendering.dart';
 
 import 'package:flame/sprite.dart';
+import 'package:flame_svg/flame_svg.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flame/input.dart';
@@ -98,6 +99,7 @@ class ShooterGame extends FlameGame
 
     overlays.add("Dashboard");
     await add(_world);
+    await add(SVGWorld()..priority = 2);
 
     //await add(_svgWorld);
     //await add(_car..priority = 3);

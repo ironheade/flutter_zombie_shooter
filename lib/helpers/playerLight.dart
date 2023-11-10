@@ -41,6 +41,7 @@ class PlayerLight extends CircleComponent
     PlayerLight,
     Bullet,
     ScreenHitbox,
+
     //Zombie
   ];
 
@@ -49,6 +50,7 @@ class PlayerLight extends CircleComponent
     PlayerLight,
     Bullet,
     StreetLamp,
+
     //Zombie
   ];
 

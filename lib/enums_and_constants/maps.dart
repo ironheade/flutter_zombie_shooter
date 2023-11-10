@@ -17,9 +17,20 @@ class MyHitbox {
       required this.hitboxSize});
 }
 
+class MyObstacleRound {
+  Vector2 hitboxPosition;
+  double hitboxRadius;
+
+  MyObstacleRound({
+    required this.hitboxPosition,
+    required this.hitboxRadius,
+  });
+}
+
 class GameMap {
   String background;
   //List<ShapeHitbox> hitboxes;
+  List<MyObstacleRound> obstaclesRound;
   List<MyHitbox> hitboxes;
   Color decoratorColor;
   List<PlayerLight> lightSources;
@@ -32,6 +43,7 @@ class GameMap {
   GameMap(
       {required this.background,
       this.hitboxes = const [],
+      this.obstaclesRound = const [],
       this.lightSources = const [],
       this.additionalComponents = const [],
       this.decoratorColor = const Color.fromARGB(220, 0, 0, 0)});
@@ -254,6 +266,23 @@ List<GameMap> maps = [
   GameMap(
       background: 'laboratory_map.png',
       decoratorColor: Color.fromARGB(182, 0, 0, 0),
+      obstaclesRound: [
+        MyObstacleRound(hitboxPosition: Vector2(409, 361), hitboxRadius: 25),
+        MyObstacleRound(hitboxPosition: Vector2(823, 396), hitboxRadius: 35),
+        MyObstacleRound(hitboxPosition: Vector2(886, 348), hitboxRadius: 35),
+        MyObstacleRound(hitboxPosition: Vector2(807, 319), hitboxRadius: 35),
+        MyObstacleRound(hitboxPosition: Vector2(711, 319), hitboxRadius: 35),
+        MyObstacleRound(hitboxPosition: Vector2(622, 319), hitboxRadius: 35),
+        MyObstacleRound(hitboxPosition: Vector2(540, 326), hitboxRadius: 35),
+        MyObstacleRound(hitboxPosition: Vector2(1023, 558), hitboxRadius: 35),
+        MyObstacleRound(hitboxPosition: Vector2(851, 582), hitboxRadius: 35),
+        MyObstacleRound(hitboxPosition: Vector2(772, 547), hitboxRadius: 35),
+        MyObstacleRound(hitboxPosition: Vector2(684, 552), hitboxRadius: 35),
+        MyObstacleRound(hitboxPosition: Vector2(605, 582), hitboxRadius: 35),
+        MyObstacleRound(hitboxPosition: Vector2(535, 552), hitboxRadius: 35),
+        MyObstacleRound(hitboxPosition: Vector2(433, 582), hitboxRadius: 35),
+        MyObstacleRound(hitboxPosition: Vector2(474, 437), hitboxRadius: 35),
+      ],
       hitboxes: [
         MyHitbox(
             hitboxSize: Vector2(1226.0, 21.0),

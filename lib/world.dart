@@ -30,6 +30,23 @@ class Wall extends RectangleComponent {
             children: wallChildren);
 }
 
+class RoundObstacle extends CircleComponent {
+  late Vector2 obstablePosition;
+  late double obstableRadius;
+  late int wallPriority;
+  late List<Component> obstacleChildren;
+  RoundObstacle({
+    required this.obstablePosition,
+    required this.obstableRadius,
+    required this.obstacleChildren,
+  }) : super(
+            position: obstablePosition,
+            radius: obstableRadius,
+            paint: Paint()..color = Color.fromARGB(0, 0, 0, 0),
+            anchor: Anchor.center,
+            children: obstacleChildren);
+}
+
 class World extends SpriteComponent with HasGameRef<ShooterGame> {
   GameMap map;
 
@@ -48,17 +65,14 @@ class World extends SpriteComponent with HasGameRef<ShooterGame> {
     //sprite = await gameRef.loadSprite(map.background);
     sprite = await gameRef.loadSprite(map.background);
     size = sprite!.originalSize;
-/*
-    for (var hitbox in map.hitboxes) {
-      await parent!.add(RectangleComponent(
-          position: hitbox.hitboxPosition,
-          size: hitbox.hitboxSize,
-          angle: hitbox.hitboxAngle,
-          priority: 8,
-          paint: Paint()..color = Color.fromARGB(255, 58, 58, 58),
-          children: [RectangleHitbox()]));
+
+    for (var hitbox in map.obstaclesRound) {
+      await parent!.add(RoundObstacle(
+          obstablePosition: hitbox.hitboxPosition,
+          obstableRadius: hitbox.hitboxRadius,
+          obstacleChildren: [CircleHitbox()]));
     }
-*/
+
     for (var hitbox in map.hitboxes) {
       await parent!.add(Wall(
           wallPosition: hitbox.hitboxPosition,
