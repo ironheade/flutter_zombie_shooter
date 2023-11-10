@@ -5,7 +5,6 @@ import 'package:flutter_zombie_shooter/mainMenu.dart';
 import 'shooter_game.dart';
 import 'helpers/navigation.dart';
 import 'package:flutter/services.dart';
-import 'package:rive/rive.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();

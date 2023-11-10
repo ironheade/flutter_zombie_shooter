@@ -15,7 +15,7 @@ import 'package:flutter_zombie_shooter/world.dart';
 class Bullet extends SpriteComponent with HasGameRef, CollisionCallbacks {
   final double _speed = 1000;
   double directionAngle;
-  List collisionRuntimetypes = [World, Zombie, StreetLamp];
+  List collisionRuntimetypes = [World, Zombie, StreetLamp, Wall];
   NotifyingVector2 worldSize;
   late ShapeHitbox bulletHitbox = RectangleHitbox();
   late SpriteSheet spriteSheet;

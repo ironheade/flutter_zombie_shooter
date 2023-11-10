@@ -52,7 +52,14 @@ class Player extends SpriteAnimationComponent
   Weapon weapon = Weapon.handgun;
   PlayerAction playerAction = PlayerAction.wait;
   late Map animations;
-  List collisionRuntimetypes = [Car, StreetLamp, World, MyObject, ScreenHitbox];
+  List collisionRuntimetypes = [
+    Car,
+    StreetLamp,
+    World,
+    MyObject,
+    ScreenHitbox,
+    Wall
+  ];
   ShapeHitbox playerHitbox = CircleHitbox(isSolid: true);
 
   double _speed = 300;

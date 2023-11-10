@@ -18,6 +18,11 @@ import 'package:flutter_zombie_shooter/helpers/bullet.dart';
 import 'package:flutter_zombie_shooter/player.dart';
 import 'package:flutter_zombie_shooter/shooter_game.dart';
 
+class ZombieHitbox extends CircleHitbox {
+  late double radius;
+  ZombieHitbox({required this.radius}) : super(radius: radius);
+}
+
 class Zombie extends SpriteAnimationComponent
     with CollisionCallbacks, HasGameRef<ShooterGame> {
   double _animationSpeed = kZombieAnimationSpeed;
@@ -32,6 +37,7 @@ class Zombie extends SpriteAnimationComponent
   late SpriteAnimation zombieAttack;
   late SpriteAnimation zombieRun;
   late Vector2 movementVector;
+  ShapeHitbox zombieHitbox = CircleHitbox();
 
   final shadowDecorator = Shadow3DDecorator(angle: 180, base: Vector2(50, 50));
 
@@ -103,10 +109,12 @@ class Zombie extends SpriteAnimationComponent
               );
             })));
             */
-
+    //add(ZombieHitbox(radius: 10)..priority = 10);
     add(CircleHitbox()
       ..collisionType = CollisionType.passive
-      ..isSolid = true);
+      ..isSolid = true
+      ..position =
+          Vector2(0.3 * size.x - size.x / 2, 0.45 * size.x - size.x / 2));
     await _loadAnimations().then(
       (_) => {
         animation = zombieAnimation,
