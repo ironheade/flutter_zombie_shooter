@@ -10,13 +10,17 @@ import 'package:flutter/animation.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_zombie_shooter/enums_and_constants/constants.dart';
+import 'package:flutter_zombie_shooter/enums_and_constants/directions.dart';
 import 'package:flutter_zombie_shooter/enums_and_constants/enemies.dart';
 import 'package:flutter_zombie_shooter/functions/functions.dart';
 import 'package:flutter_zombie_shooter/helpers/blood.dart';
 import 'package:flutter_zombie_shooter/helpers/car.dart';
 import 'package:flutter_zombie_shooter/helpers/bullet.dart';
+import 'package:flutter_zombie_shooter/helpers/object.dart';
+import 'package:flutter_zombie_shooter/helpers/streetLamp.dart';
 import 'package:flutter_zombie_shooter/player.dart';
 import 'package:flutter_zombie_shooter/shooter_game.dart';
+import 'package:flutter_zombie_shooter/world.dart';
 
 class ZombieHitbox extends CircleHitbox {
   late double radius;
@@ -32,12 +36,20 @@ class Zombie extends SpriteAnimationComponent
   int bloodSplashType = Random().nextInt(bloodSpasheTypes.length);
   List<List<Sprite>> bloodSpritesWithColor = [];
   late Player player;
-  bool onCollidable = false;
+
   late SpriteAnimation zombieAnimation;
   late SpriteAnimation zombieAttack;
   late SpriteAnimation zombieRun;
   late Vector2 movementVector;
   ShapeHitbox zombieHitbox = CircleHitbox();
+  List collisionRuntimetypes = [
+    Car,
+    StreetLamp,
+    World,
+    MyObject,
+    Wall,
+    RoundObstacle
+  ];
 
   final shadowDecorator = Shadow3DDecorator(angle: 180, base: Vector2(50, 50));
 
@@ -131,22 +143,6 @@ class Zombie extends SpriteAnimationComponent
     });
   }
 
-  @override
-  void onCollisionStart(
-      Set<Vector2> intersectionPoints, PositionComponent other) {
-    if (other.runtimeType == Car) {
-      //movementVector = Vector2.all(0);
-      //onCollidable = true;
-    }
-  }
-
-  @override
-  void onCollisionEnd(PositionComponent other) {
-    if (other.runtimeType == Car) {
-      //onCollidable = false;
-    }
-  }
-
   void Bleed(double angle, Set<Vector2> intersectionPoints) {
     add(ParticleSystemComponent(
         particle: Particle.generate(
@@ -190,42 +186,18 @@ class Zombie extends SpriteAnimationComponent
         gameRef.kills.value += 1;
       }
     }
-    /*
-    if (other.runtimeType == Car) {
-      position = position +
-          getResetVector(
-              intersectionPoints: intersectionPoints,
-              position: position,
-              size: size);
-    }
-    */
-    if (other.runtimeType == Car) {
-      Vector2 vectorTowardsBox =
-          (intersectionPoints.first + intersectionPoints.last) / 2 - position;
-      Vector2 currentMovementVector = (player.position - position);
-      double vectorAngle =
-          AngleBetweenVectors(vectorTowardsBox, currentMovementVector);
-      if (vectorAngle < pi / 2) {
-        onCollidable = true;
-      }
-      if (onCollidable) {
-        //Projection of the movement Vector to the resulting vector of both intersection points
-        Vector2 directionVector = (player.position - position);
-        Vector2 projectionVector =
-            intersectionPoints.first - intersectionPoints.last;
-
-        Vector2 newDirectionVector =
-            projectVector(directionVector, projectionVector);
-
-        movementVector = newDirectionVector /
-            newDirectionVector.length *
-            (player.position - position).length;
-
-        //angle between the actual movement vector and the vector between player center and middle of intersection points
-
-        if (vectorAngle > pi / 2) {
-          onCollidable = false;
-        }
+    movementVector = (player.position - position).normalized();
+    if (collisionRuntimetypes.contains(other.runtimeType)) {
+      for (var resetVector in getResetVector(
+          direction: Direction(
+              leftX: movementVector.x,
+              leftY: movementVector.y,
+              rightX: 0,
+              rightY: 0),
+          intersectionPoints: intersectionPoints,
+          position: position,
+          size: size)) {
+        position = position + resetVector;
       }
     }
   }
@@ -240,7 +212,7 @@ class Zombie extends SpriteAnimationComponent
     double thetaRadians = atan2(deltaY, deltaX);
 
     angle = thetaRadians;
-    onCollidable ? null : movementVector = (player.position - position);
+    movementVector = (player.position - position);
 
     Vector2 distanceVector = (player.position - position);
 
@@ -266,7 +238,7 @@ class Zombie extends SpriteAnimationComponent
     }
 
     if (movementVector.length > 100) {
-      position += movementVector / movementVector.length * speed * dt;
+      position += movementVector.normalized() * speed * dt;
     }
   }
 }

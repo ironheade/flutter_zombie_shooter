@@ -13,4 +13,11 @@ class Blood extends SpriteComponent {
             priority: 1,
             position: bloodPosition,
             angle: angle + pi);
+
+  @override
+  Future<void> onLoad() async {
+    Future.delayed(const Duration(milliseconds: 2500), () {
+      removeFromParent();
+    });
+  }
 }

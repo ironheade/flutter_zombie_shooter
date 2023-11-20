@@ -59,7 +59,8 @@ class Player extends SpriteAnimationComponent
     MyObject,
     ScreenHitbox,
     Wall,
-    RoundObstacle
+    RoundObstacle,
+    Zombie
   ];
   ShapeHitbox playerHitbox = CircleHitbox(isSolid: true);
 

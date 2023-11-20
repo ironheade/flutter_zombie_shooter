@@ -380,45 +380,6 @@ class PlayerLight extends CircleComponent
     ]);
   }
 
-/*
-  List<Offset> getPolygonRectangle(
-      {required Vector2 lightPosition,
-      required Vector2 objectPosition,
-      required Vector2 edgePointA,
-      required Vector2 edgePointB,
-      required Vector2 closesPoint}) {
-    Offset centerOffset = Offset(lightPosition.x, lightPosition.y) -
-        Offset(lightRadius, lightRadius);
-    Vector2 dirVectorCenter = ((lightPosition - objectPosition) /
-        (lightPosition - objectPosition).length);
-    Vector2 centerOffset1 = edgePointA;
-    Vector2 centerOffset2 = edgePointB;
-    Vector2 dirVectorOffset1 = ((lightPosition - centerOffset1) /
-        (lightPosition - centerOffset1).length);
-    Vector2 dirVectorOffset2 = ((lightPosition - centerOffset2) /
-        (lightPosition - centerOffset2).length);
-
-    Vector2 playerCenter1 = centerOffset1;
-    Vector2 playerCenter2 = centerOffset2;
-    Vector2 outerCenterPoint =
-        objectPosition - dirVectorCenter * lightRadius * 10;
-    Vector2 outerPoint1 = objectPosition +
-        Vector2(-dirVectorCenter.y, dirVectorCenter.x)  * -20 -
-        dirVectorOffset2 * lightRadius * 10;
-    Vector2 outerPoint2 = objectPosition +
-        Vector2(-dirVectorCenter.y, dirVectorCenter.x) * 20 -
-        dirVectorOffset1 * lightRadius * 10;
-
-    return ([
-      Offset(playerCenter1.x, playerCenter1.y) - centerOffset,
-      //Offset(closesPoint.x, closesPoint.y) - centerOffset,
-      Offset(playerCenter2.x, playerCenter2.y) - centerOffset,
-      Offset(outerPoint1.x, outerPoint1.y) - centerOffset,
-      Offset(outerCenterPoint.x, outerCenterPoint.y) - centerOffset,
-      Offset(outerPoint2.x, outerPoint2.y) - centerOffset,
-    ]);
-  }
-*/
   List<Offset> getPolygonCircle(
       {required Vector2 lightPosition,
       required Vector2 objectPosition,
@@ -426,10 +387,17 @@ class PlayerLight extends CircleComponent
     Offset centerOffset =
         lightPosition.toOffset() - Offset(lightRadius, lightRadius);
     Vector2 dirVectorCenter = (lightPosition - objectPosition).normalized();
-    Vector2 edgePointA = objectPosition +
-        Vector2(-dirVectorCenter.y, dirVectorCenter.x) * radius;
-    Vector2 edgePointB = objectPosition +
-        Vector2(dirVectorCenter.y, -dirVectorCenter.x) * radius;
+    double distanceLightObject = (lightPosition - objectPosition).length;
+    double theta = acos(radius / distanceLightObject);
+    double d = atan2(
+        lightPosition.y - objectPosition.y, lightPosition.x - objectPosition.x);
+    double d1 = d + theta;
+    double d2 = d - theta;
+
+    Vector2 edgePointA = Vector2(objectPosition.x + radius * cos(d1),
+        objectPosition.y + radius * sin(d1));
+    Vector2 edgePointB = Vector2(objectPosition.x + radius * cos(d2),
+        objectPosition.y + radius * sin(d2));
     Vector2 dirVectorOffset1 = (lightPosition - edgePointA).normalized();
     Vector2 dirVectorOffset2 = (lightPosition - edgePointB).normalized();
 

@@ -115,7 +115,7 @@ class ShooterGame extends FlameGame
     //await add(torch..priority = 2);
     //await add(_lightSource..priority = 2);
 
-    //await add(EnemyManager(player: _player)..priority = 2);
+    await add(EnemyManager(player: _player)..priority = 2);
     //await add(_object);
     await add(Zombie(player: _player)
       ..position = _world.size / 2 - Vector2(150, 0)
