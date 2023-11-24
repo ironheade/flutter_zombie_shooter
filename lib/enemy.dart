@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:flame/collisions.dart';
 import 'package:flame/components.dart';
+import 'package:flame/effects.dart';
 import 'package:flame/particles.dart';
 import 'package:flame/rendering.dart';
 import 'package:flame/sprite.dart';
@@ -12,6 +13,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_zombie_shooter/enums_and_constants/constants.dart';
 import 'package:flutter_zombie_shooter/enums_and_constants/directions.dart';
 import 'package:flutter_zombie_shooter/enums_and_constants/enemies.dart';
+import 'package:flutter_zombie_shooter/enums_and_constants/enemyblood.dart';
 import 'package:flutter_zombie_shooter/functions/functions.dart';
 import 'package:flutter_zombie_shooter/helpers/blood.dart';
 import 'package:flutter_zombie_shooter/helpers/car.dart';
@@ -30,17 +32,24 @@ class ZombieHitbox extends CircleHitbox {
 class Zombie extends SpriteAnimationComponent
     with CollisionCallbacks, HasGameRef<ShooterGame> {
   double _animationSpeed = kZombieAnimationSpeed;
-  int healthPoints = kZombieHealthpoints;
+  //int healthPoints = kZombieHealthpoints;
   double speed = kZombieSpeed;
 
   int bloodSplashType = Random().nextInt(bloodSpasheTypes.length);
   List<List<Sprite>> bloodSpritesWithColor = [];
   late Player player;
+  late EnemyType enemyType;
 
   late SpriteAnimation zombieAnimation;
   late SpriteAnimation zombieAttack;
   late SpriteAnimation zombieRun;
   late Vector2 movementVector;
+  late int healthPoints;
+  late Color zombieFilter;
+  late double zombieSpeedFactor;
+  late int damage;
+  late EnemyDescription enemyDescription;
+  Map<EnemyAction, List<SpriteAnimation>> animations = {};
   ShapeHitbox zombieHitbox = CircleHitbox();
   List collisionRuntimetypes = [
     Car,
@@ -53,7 +62,11 @@ class Zombie extends SpriteAnimationComponent
 
   final shadowDecorator = Shadow3DDecorator(angle: 180, base: Vector2(50, 50));
 
-  Zombie({required this.player})
+  Zombie(
+      {required this.player,
+      required this.enemyType,
+      this.zombieSpeedFactor = 1,
+      this.zombieFilter = const Color.fromARGB(170, 2, 0, 0)})
       : super(
           size: Vector2.all(kZombieSize),
         );
@@ -73,7 +86,48 @@ class Zombie extends SpriteAnimationComponent
               row: 0, stepTime: animationSpeed, from: 0, to: columns - 1);
     }
 
+    for (var entry in enemyDescription.mapOfAnimation.entries) {
+      animations[entry.key] = [
+        for (var animation in enemyDescription.mapOfAnimation[entry.key]!)
+          await makeAnimation(
+              columns: animation.columns,
+              rows: 1,
+              image: animation.image,
+              animationSpeed: _animationSpeed * animation.animationSpeed),
+      ];
+    }
+/*
+    animations[EnemyAction.walk] = [
+      for (var animation in enemyDescription.mapOfAnimation[EnemyAction.walk]!)
+        await makeAnimation(
+            columns: animation.columns,
+            rows: 1,
+            image: animation.image,
+            animationSpeed: _animationSpeed * animation.animationSpeed),
+    ];
+    */
+
+    //{for (var walkAnimation in enemyDescription.mapOfAnimation[EnemyAction.walk]!)
+    //{await makeAnimation(columns: columns, rows: rows, image: image, animationSpeed: animationSpeed)}};
+/*
     zombieAnimation = await makeAnimation(
+        columns: 9,
+        rows: 1,
+        image: "Zombie_big_hands_walk.png",
+        animationSpeed: _animationSpeed * 2);
+    zombieAttack = await makeAnimation(
+        columns: 9,
+        rows: 1,
+        image: "Zombie_big_hands_attack.png",
+        animationSpeed: _animationSpeed * 2);
+    zombieRun = await makeAnimation(
+        columns: 9,
+        rows: 1,
+        image: "Zombie_big_hands_walk.png",
+        animationSpeed: _animationSpeed * 2);
+
+    
+        zombieAnimation = await makeAnimation(
         columns: 17,
         rows: 1,
         image: "zombie-idle.png",
@@ -88,13 +142,16 @@ class Zombie extends SpriteAnimationComponent
         rows: 1,
         image: "zombie-move.png",
         animationSpeed: _animationSpeed);
+         */
   }
 
   @override
   Future<void> onLoad() async {
+    healthPoints = enemies[enemyType]!.healthPoints;
     super.onLoad();
+    enemyDescription = enemies[enemyType]!;
     //debugMode = true;
-    decorator.addLast(PaintDecorator.tint(Color.fromARGB(170, 2, 0, 0)));
+    decorator.addLast(PaintDecorator.tint(zombieFilter));
     for (var bloodSplashColor in bloodSpasheTypes) {
       bloodSpritesWithColor.add(
         [
@@ -129,7 +186,7 @@ class Zombie extends SpriteAnimationComponent
           Vector2(0.3 * size.x - size.x / 2, 0.45 * size.x - size.x / 2));
     await _loadAnimations().then(
       (_) => {
-        animation = zombieAnimation,
+        animation = animations[EnemyAction.walk]![0],
         anchor = Anchor(0.3, 0.45), //top left clockwise: 0,0;1,0;1,1;0,1
         //scale = Vector2.all(0.5)
       },
@@ -163,6 +220,10 @@ class Zombie extends SpriteAnimationComponent
             })));
   }
 
+  void removeHealtPoints({required int removePoints}) {
+    print(removePoints);
+  }
+
   @override
   void onCollision(Set<Vector2> intersectionPoints, PositionComponent other) {
     super.onCollision(intersectionPoints, other);
@@ -180,9 +241,10 @@ class Zombie extends SpriteAnimationComponent
           angle: other.angle)
         ..priority = 0);
 
-      healthPoints -= 25;
+      //healthPoints -= 25;
       if (healthPoints <= 0) {
         removeFromParent();
+        gameRef.enemyList.removeWhere((element) => element == this);
         gameRef.kills.value += 1;
       }
     }
@@ -211,30 +273,35 @@ class Zombie extends SpriteAnimationComponent
     double deltaY = player.position.y - position.y;
     double thetaRadians = atan2(deltaY, deltaX);
 
-    angle = thetaRadians;
+    angle = thetaRadians + enemyDescription.extraRotation;
     movementVector = (player.position - position);
 
     Vector2 distanceVector = (player.position - position);
 
     if (distanceVector.length < 120) {
       i += 1;
-      animation = zombieAttack;
-      scale = Vector2.all(1.3);
+      animation = animations[EnemyAction.attack]![0];
+      //scale = Vector2.all(1.3);
+      scale = Vector2.all(
+          enemyDescription.mapOfAnimation[EnemyAction.attack]![0].scale);
       speed = kZombieSpeed * 0;
       if (i == 30) {
-        gameRef.hp.value -= 1;
-        //gameRef.camera.shake(duration: 0.1, intensity: 1);
+        gameRef.hp.value -= enemies[enemyType]!.damage;
+        gameRef.camera.shake(duration: 0.1, intensity: 1);
         //print(player.HP);
         i = 0;
       }
     } else if ((distanceVector.length > 120 && distanceVector.length < 220)) {
-      animation = zombieRun;
-      scale = Vector2.all(1.3);
-      speed = kZombieSpeed * 3;
+      animation = animations[EnemyAction.run]![0];
+      scale = Vector2.all(
+          enemyDescription.mapOfAnimation[EnemyAction.run]![0].scale);
+      speed = kZombieSpeed * 3 * zombieSpeedFactor;
     } else {
-      animation = zombieAnimation;
-      scale = Vector2.all(1);
-      speed = kZombieSpeed;
+      animation = animations[EnemyAction.walk]![0];
+      scale = Vector2.all(
+          enemyDescription.mapOfAnimation[EnemyAction.walk]![0].scale);
+      //scale = Vector2.all(1);
+      speed = kZombieSpeed * zombieSpeedFactor;
     }
 
     if (movementVector.length > 100) {

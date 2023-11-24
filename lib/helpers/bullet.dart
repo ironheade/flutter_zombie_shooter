@@ -10,9 +10,11 @@ import 'package:flutter_zombie_shooter/enums_and_constants/weapons.dart';
 import 'package:flutter_zombie_shooter/helpers/playerLight.dart';
 import 'package:flutter_zombie_shooter/helpers/streetLamp.dart';
 import 'package:flutter_zombie_shooter/player.dart';
+import 'package:flutter_zombie_shooter/shooter_game.dart';
 import 'package:flutter_zombie_shooter/world.dart';
 
-class Bullet extends SpriteComponent with HasGameRef, CollisionCallbacks {
+class Bullet extends SpriteComponent
+    with CollisionCallbacks, HasGameRef<ShooterGame> {
   final double _speed = 1000;
   double directionAngle;
   List collisionRuntimetypes = [World, Zombie, StreetLamp, Wall];
@@ -33,6 +35,7 @@ class Bullet extends SpriteComponent with HasGameRef, CollisionCallbacks {
     //int damage = 25,
   }) : super(
           sprite: sprite,
+          //paint: Paint()..color = Color.fromARGB(255, 250, 3, 3),
           position: Vector2(
               player.position.x +
                   cos(player.absoluteAngle) *
@@ -57,8 +60,13 @@ class Bullet extends SpriteComponent with HasGameRef, CollisionCallbacks {
   Future<void> onLoad() async {
     // _LoadAinmations().then((_) => {sprite = bulletSpriteSheets[weapon]});
     add(bulletHitbox);
+    //print(gameRef.GegnerListe[0].healthPoints-=10);
+    //print(gameRef.enemyList.length);
 
-    add(PlayerLight(lightPosition: Vector2.all(1), lightRadius: 10)
+    add(PlayerLight(
+        lightPosition: Vector2.all(1),
+        lightRadius: 10,
+        primaryLighColour: weaponBulletLight[player.weapon]!)
       ..priority = 5);
     super.onLoad();
   }
@@ -66,6 +74,12 @@ class Bullet extends SpriteComponent with HasGameRef, CollisionCallbacks {
   @override
   void onCollision(Set<Vector2> intersectionPoints, PositionComponent other) {
     super.onCollision(intersectionPoints, other);
+    if (gameRef.enemyList.contains(other)) {
+      gameRef
+          .enemyList[
+              gameRef.enemyList.indexWhere((element) => element == other)]
+          .healthPoints -= weaponBulletDamage[player.weapon]!;
+    }
 
     if (collisionRuntimetypes.contains(other.runtimeType)) {
       removeFromParent();
@@ -77,13 +91,5 @@ class Bullet extends SpriteComponent with HasGameRef, CollisionCallbacks {
     super.update(dt);
 
     position += getVecorFromAngle(directionAngle) * _speed * dt;
-/*
-    if (position.y < 0 ||
-        position.x < 0 ||
-        position.y > worldSize.y ||
-        position.x > worldSize.x) {
-      removeFromParent();
-    }
-    */
   }
 }

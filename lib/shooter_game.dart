@@ -18,6 +18,7 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter_zombie_shooter/enemy.dart';
 import 'package:flutter_zombie_shooter/enums_and_constants/actions.dart';
 import 'package:flutter_zombie_shooter/enums_and_constants/constants.dart';
+import 'package:flutter_zombie_shooter/enums_and_constants/enemies.dart';
 import 'package:flutter_zombie_shooter/enums_and_constants/mapComponents.dart';
 import 'package:flutter_zombie_shooter/enums_and_constants/maps.dart';
 import 'package:flutter_zombie_shooter/helpers/car.dart';
@@ -51,6 +52,7 @@ class ShooterGame extends FlameGame
   final ParallaxComponent _parallax = ParallaxComponent();
   final Car _car = Car();
   final MyObject _object = MyObject();
+  final List<Zombie> enemyList = [];
 
   final RectangleComponent _blackoutScreen = RectangleComponent(
     paint: Paint()..color = Color.fromARGB(0, 0, 0, 0),
@@ -73,6 +75,7 @@ class ShooterGame extends FlameGame
 
   ValueNotifier<int> kills = ValueNotifier<int>(0);
   ValueNotifier<int> hp = ValueNotifier<int>(kPlayerHealthPoints);
+  double xShiftCamera = 0;
 
   final Player _player = Player();
   late PlayerLight torch = PlayerLight(
@@ -107,19 +110,15 @@ class ShooterGame extends FlameGame
     //await add(_treeManager..priority = 4);
     await add(
         lootBoxManager(player: _player, worldSize: _world.size)..priority = 2);
-    /*await add(LightSource(
-        lightRadius: 200,
-        playerPosition: _player.position,
-        primaryLighColour: Color.fromARGB(255, 206, 107, 107)));*/
+    //await add(enemyList);
     await add(torch);
-    //await add(torch..priority = 2);
-    //await add(_lightSource..priority = 2);
 
     await add(EnemyManager(player: _player)..priority = 2);
-    //await add(_object);
-    await add(Zombie(player: _player)
+/*
+    await add(Zombie(player: _player, enemyType: EnemyType.megaBoss)
       ..position = _world.size / 2 - Vector2(150, 0)
       ..priority = 2);
+*/
     for (var component in _world.map.additionalComponents) {
       add(component);
     }
@@ -241,12 +240,21 @@ class ShooterGame extends FlameGame
     //print(_svgWorld.mapSize);
 
     camera.followComponent(_player,
+        //relativeOffset: Anchor(0.5 + xShiftCamera, 0.5),
         worldBounds: Rect.fromLTRB(0, 0, _world.size.x, _world.size.y));
+  }
+
+  @override
+  void update(double dt) {
+    super.update(dt);
   }
 
   bool isFiring = false;
   bool loading = false;
   onDirectionChanged(Direction direction) {
+    //xShiftCamera = direction.leftX;
+    //camera.moveTo(_player.position - Vector2(direction.leftX, direction.leftY));
+
     if (Vector2(direction.rightX, direction.rightY).length > 0.8 &&
         !_player.dead &&
         _player.weapon != Weapon.knife &&
@@ -323,7 +331,10 @@ class ShooterGame extends FlameGame
       Weapon.rifle: magazineCapacity[Weapon.rifle] ?? 10,
       Weapon.shotgun: magazineCapacity[Weapon.shotgun] ?? 10
     };
-
+    for (var enemy in enemyList) {
+      enemy.removeFromParent();
+    }
+    enemyList.clear;
     add(EnemyManager(player: _player)..priority = 2);
     add(lootBoxManager(player: _player, worldSize: _world.size)..priority = 2);
   }

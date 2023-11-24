@@ -1,4 +1,5 @@
 import 'package:flame/components.dart';
+import 'package:flutter/animation.dart';
 
 enum Weapon { rifle, shotgun, handgun, knife, flashlight }
 
@@ -47,6 +48,18 @@ Map<Weapon, String> weaponBulletSprites = {
   Weapon.handgun: "handgunBullet.png",
   Weapon.rifle: "bullet.png",
   Weapon.shotgun: "bullet.png",
+};
+
+Map<Weapon, int> weaponBulletDamage = {
+  Weapon.handgun: 100,
+  Weapon.rifle: 25,
+  Weapon.shotgun: 25,
+};
+
+Map<Weapon, Color> weaponBulletLight = {
+  Weapon.handgun: Color.fromARGB(174, 255, 242, 182),
+  Weapon.rifle: Color.fromARGB(172, 244, 25, 5),
+  Weapon.shotgun: Color.fromARGB(172, 4, 8, 240),
 };
 
 Map<Weapon, Map<Offsets, num>> bulletOffset = {
